@@ -1,0 +1,7 @@
+{
+  "name": "@preflight/profiles",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "거래 유형. 데이터만 — 이 패키지에 .ts 파일이 생기면 07 합격 기준 2가 깨진 것이다."
+}

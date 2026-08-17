@@ -1,0 +1,18 @@
+{
+  "spacing": "여백",
+  "saturation": "채도",
+  "type": "서체",
+  "density": "밀도",
+  "corner": "모서리",
+  "focus": "초점",
+  "wide": "넓게",
+  "tight": "좁게",
+  "low": "낮게",
+  "high": "높게",
+  "serif": "세리프",
+  "sans": "산세리프",
+  "sharp": "각지게",
+  "round": "둥글게",
+  "image": "이미지",
+  "text": "텍스트"
+}

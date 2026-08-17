@@ -1,0 +1,18 @@
+{
+  "spacing": "Spacing",
+  "saturation": "Saturation",
+  "type": "Type",
+  "density": "Density",
+  "corner": "Corner",
+  "focus": "Focus",
+  "wide": "Wide",
+  "tight": "Tight",
+  "low": "Low",
+  "high": "High",
+  "serif": "Serif",
+  "sans": "Sans",
+  "sharp": "Sharp",
+  "round": "Round",
+  "image": "Image",
+  "text": "Text"
+}

@@ -1,0 +1,18 @@
+{
+  "spacing": "Espaciado",
+  "saturation": "Saturación",
+  "type": "Tipografía",
+  "density": "Densidad",
+  "corner": "Esquina",
+  "focus": "Enfoque",
+  "wide": "Amplio",
+  "tight": "Estrecho",
+  "low": "Bajo",
+  "high": "Alto",
+  "serif": "Serif",
+  "sans": "Sans",
+  "sharp": "Recto",
+  "round": "Redondo",
+  "image": "Imagen",
+  "text": "Texto"
+}

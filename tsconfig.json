@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "resolveJsonModule": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "strict": true,
+    "exactOptionalPropertyTypes": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "verbatimModuleSyntax": true,
+    "skipLibCheck": true,
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "@preflight/core": ["packages/core/src/index.ts"],
+      "@preflight/core/*": ["packages/core/src/*"],
+      "@preflight/render": ["packages/render/src/index.ts"],
+      "@preflight/render/*": ["packages/render/src/*"],
+      "@preflight/tokens": ["packages/tokens/src/index.ts"],
+      "@preflight/testkit": ["packages/testkit/src/index.ts"],
+      "@preflight/testkit/*": ["packages/testkit/src/*"]
+    }
+  },
+  "include": ["packages/**/*.ts", "apps/**/*.ts", "tools/**/*.ts", "*.ts"],
+  "exclude": ["node_modules", "**/node_modules"]
+}

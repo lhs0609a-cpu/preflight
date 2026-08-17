@@ -1,0 +1,36 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2 # check-data-only 가 부모 커밋과 대조한다
+      - uses: pnpm/action-setup@v4
+        with: { version: 9 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: lint
+        run: pnpm lint
+      - name: typecheck
+        run: pnpm typecheck
+      - name: schema (Zod 단일 소스와 일치)
+        run: pnpm schema:check
+      - name: labels (8 로케일 × 3단어 이내)
+        run: pnpm labels:check
+      - name: test
+        run: pnpm test
+      - name: wordless (G-5 · 합격 기준 5)
+        run: pnpm check:wordless
+      - name: data-only (합격 기준 2)
+        run: node tools/ci/check-data-only.mjs

@@ -1,0 +1,18 @@
+{
+  "spacing": "Espasyo",
+  "saturation": "Saturation",
+  "type": "Titik",
+  "density": "Densidad",
+  "corner": "Sulok",
+  "focus": "Pokus",
+  "wide": "Malapad",
+  "tight": "Masikip",
+  "low": "Mababa",
+  "high": "Mataas",
+  "serif": "Serif",
+  "sans": "Sans",
+  "sharp": "Matulis",
+  "round": "Bilog",
+  "image": "Larawan",
+  "text": "Teksto"
+}

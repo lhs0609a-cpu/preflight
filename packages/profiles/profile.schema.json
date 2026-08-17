@@ -1,0 +1,670 @@
+{
+  "$ref": "#/definitions/ProfileSource",
+  "definitions": {
+    "ProfileSource": {
+      "type": "object",
+      "properties": {
+        "slug": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[a-z0-9][a-z0-9-]*$"
+        },
+        "nameKey": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[a-z0-9][a-z0-9_.-]*$"
+        },
+        "version": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "visibility": {
+          "type": "string",
+          "enum": [
+            "system",
+            "private",
+            "public"
+          ]
+        },
+        "authorId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "reversibility": {
+          "type": "string",
+          "enum": [
+            "cheap",
+            "gated",
+            "outcome"
+          ]
+        },
+        "marketplace": {
+          "type": "object",
+          "properties": {
+            "categoryHints": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "offerTemplate": {
+              "type": "string",
+              "minLength": 1
+            },
+            "listingTemplate": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "categoryHints",
+            "offerTemplate",
+            "listingTemplate"
+          ],
+          "additionalProperties": false
+        },
+        "policy": {
+          "type": "object",
+          "properties": {
+            "revisionCount": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "pointOfNoReturnKey": {
+              "$ref": "#/definitions/ProfileSource/properties/nameKey"
+            },
+            "pnrStageIndex": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "responseSlaDays": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            }
+          },
+          "additionalProperties": false,
+          "default": {}
+        },
+        "flow": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "key": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "key"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "blocks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "PAIRWISE",
+                  "PICK_N",
+                  "CHECKLIST",
+                  "SLIDER",
+                  "ROSTER",
+                  "UPLOAD",
+                  "REHEARSAL"
+                ]
+              },
+              "labelKey": {
+                "$ref": "#/definitions/ProfileSource/properties/nameKey"
+              },
+              "icon": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "^[a-z][a-z0-9-]*$"
+              },
+              "lock": {
+                "type": "string",
+                "enum": [
+                  "hard",
+                  "soft"
+                ]
+              },
+              "priceImpact": {
+                "type": "boolean"
+              },
+              "required": {
+                "type": "boolean"
+              },
+              "config": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "PAIRWISE"
+                      },
+                      "base": {
+                        "type": "object",
+                        "additionalProperties": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "boolean"
+                            },
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "$ref": "#/definitions/ProfileSource/properties/blocks/items/properties/config/anyOf/0/properties/base/additionalProperties"
+                              }
+                            },
+                            {
+                              "type": "object",
+                              "additionalProperties": {
+                                "$ref": "#/definitions/ProfileSource/properties/blocks/items/properties/config/anyOf/0/properties/base/additionalProperties"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      "renderer": {
+                        "type": "string",
+                        "enum": [
+                          "web",
+                          "app",
+                          "video",
+                          "logo",
+                          "detail",
+                          "photo",
+                          "space",
+                          "text",
+                          "package",
+                          "chart",
+                          "audio",
+                          "image"
+                        ]
+                      },
+                      "axes": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "nameKey": {
+                              "$ref": "#/definitions/ProfileSource/properties/nameKey"
+                            },
+                            "field": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "a": {
+                              "type": "object",
+                              "properties": {
+                                "labelKey": {
+                                  "$ref": "#/definitions/ProfileSource/properties/nameKey"
+                                },
+                                "value": {
+                                  "$ref": "#/definitions/ProfileSource/properties/blocks/items/properties/config/anyOf/0/properties/base/additionalProperties"
+                                },
+                                "measure": {
+                                  "type": "string",
+                                  "minLength": 1
+                                },
+                                "image": {
+                                  "type": "string",
+                                  "format": "uri"
+                                }
+                              },
+                              "required": [
+                                "labelKey",
+                                "value",
+                                "measure"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "b": {
+                              "$ref": "#/definitions/ProfileSource/properties/blocks/items/properties/config/anyOf/0/properties/axes/items/properties/a"
+                            }
+                          },
+                          "required": [
+                            "nameKey",
+                            "field",
+                            "a",
+                            "b"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "minItems": 3,
+                        "maxItems": 8
+                      },
+                      "adaptive": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "base",
+                      "renderer",
+                      "axes"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "PICK_N"
+                      },
+                      "options": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "labelKey": {
+                              "$ref": "#/definitions/ProfileSource/properties/nameKey"
+                            },
+                            "icon": {
+                              "$ref": "#/definitions/ProfileSource/properties/blocks/items/properties/icon"
+                            },
+                            "wireframe": {
+                              "type": "array",
+                              "items": {
+                                "type": "array",
+                                "minItems": 2,
+                                "maxItems": 2,
+                                "items": [
+                                  {
+                                    "type": "string",
+                                    "enum": [
+                                      "h",
+                                      "b",
+                                      "s"
+                                    ]
+                                  },
+                                  {
+                                    "type": "integer",
+                                    "exclusiveMinimum": 0
+                                  }
+                                ]
+                              }
+                            },
+                            "image": {
+                              "type": "string",
+                              "format": "uri"
+                            },
+                            "sample": {
+                              "type": "string"
+                            },
+                            "measure": {
+                              "$ref": "#/definitions/ProfileSource/properties/blocks/items/properties/config/anyOf/0/properties/axes/items/properties/a/properties/measure"
+                            }
+                          },
+                          "required": [
+                            "labelKey",
+                            "icon",
+                            "measure"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "minItems": 2,
+                        "maxItems": 3
+                      },
+                      "style": {
+                        "type": "string",
+                        "enum": [
+                          "wireframe",
+                          "image",
+                          "sample"
+                        ]
+                      },
+                      "fidelity": {
+                        "type": "string",
+                        "enum": [
+                          "low",
+                          "high"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "options",
+                      "style",
+                      "fidelity"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "CHECKLIST"
+                      },
+                      "mode": {
+                        "type": "string",
+                        "enum": [
+                          "scope",
+                          "assets"
+                        ]
+                      },
+                      "items": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "labelKey": {
+                              "$ref": "#/definitions/ProfileSource/properties/nameKey"
+                            },
+                            "icon": {
+                              "$ref": "#/definitions/ProfileSource/properties/blocks/items/properties/icon"
+                            },
+                            "amountUsd": {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            "weeks": {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            "default": {
+                              "type": "boolean"
+                            },
+                            "fallbackAmountUsd": {
+                              "type": "number",
+                              "minimum": 0
+                            },
+                            "blocksStart": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "labelKey",
+                            "icon",
+                            "amountUsd",
+                            "weeks",
+                            "default"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "minItems": 1
+                      },
+                      "baseWeeks": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "currency": {
+                        "type": "string",
+                        "const": "USD"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "mode",
+                      "items",
+                      "baseWeeks",
+                      "currency"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "SLIDER"
+                      },
+                      "axisSource": {
+                        "type": "string",
+                        "const": "locked-axes"
+                      },
+                      "min": {
+                        "type": "number",
+                        "const": 0
+                      },
+                      "max": {
+                        "type": "number",
+                        "const": 100
+                      },
+                      "default": {
+                        "type": "number",
+                        "const": 50
+                      },
+                      "endIcons": {
+                        "type": "array",
+                        "minItems": 2,
+                        "maxItems": 2,
+                        "items": [
+                          {
+                            "$ref": "#/definitions/ProfileSource/properties/blocks/items/properties/icon"
+                          },
+                          {
+                            "$ref": "#/definitions/ProfileSource/properties/blocks/items/properties/icon"
+                          }
+                        ]
+                      },
+                      "strengthBands": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "max": {
+                              "type": "integer",
+                              "exclusiveMinimum": 0
+                            },
+                            "key": {
+                              "$ref": "#/definitions/ProfileSource/properties/nameKey"
+                            }
+                          },
+                          "required": [
+                            "max",
+                            "key"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "minItems": 1
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "axisSource",
+                      "min",
+                      "max",
+                      "default",
+                      "endIcons",
+                      "strengthBands"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "ROSTER"
+                      },
+                      "mode": {
+                        "type": "string",
+                        "enum": [
+                          "single",
+                          "consensus"
+                        ]
+                      },
+                      "maxMembers": {
+                        "type": "integer",
+                        "exclusiveMinimum": 0
+                      },
+                      "compareAxes": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "mode",
+                      "maxMembers",
+                      "compareAxes"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "UPLOAD"
+                      },
+                      "accept": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "minItems": 1
+                      },
+                      "maxSizeMB": {
+                        "type": "number",
+                        "exclusiveMinimum": 0
+                      },
+                      "linkedChecklistId": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "accept",
+                      "maxSizeMB"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "REHEARSAL"
+                      },
+                      "rehearsalKind": {
+                        "type": "string",
+                        "enum": [
+                          "test-shot",
+                          "proof-print",
+                          "mockup",
+                          "sample",
+                          "demo-cut"
+                        ]
+                      },
+                      "labelKey": {
+                        "$ref": "#/definitions/ProfileSource/properties/nameKey"
+                      },
+                      "amountUsd": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "blocksPNR": {
+                        "type": "boolean",
+                        "const": true
+                      },
+                      "checkpointKeys": {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/definitions/ProfileSource/properties/nameKey"
+                        }
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "rehearsalKind",
+                      "labelKey",
+                      "amountUsd",
+                      "blocksPNR",
+                      "checkpointKeys"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "type",
+              "labelKey",
+              "icon",
+              "lock",
+              "priceImpact",
+              "required",
+              "config"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "opinions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "axisName": {
+                "type": "string",
+                "minLength": 1
+              },
+              "want": {
+                "type": "string",
+                "minLength": 1
+              },
+              "sayKey": {
+                "type": "string",
+                "minLength": 1
+              },
+              "whyKey": {
+                "type": "string",
+                "minLength": 1
+              },
+              "clientView": {
+                "type": "string",
+                "const": "compare-only"
+              }
+            },
+            "required": [
+              "axisName",
+              "want",
+              "sayKey",
+              "whyKey",
+              "clientView"
+            ],
+            "additionalProperties": false
+          },
+          "default": []
+        }
+      },
+      "required": [
+        "slug",
+        "nameKey",
+        "version",
+        "visibility",
+        "reversibility",
+        "marketplace",
+        "flow",
+        "blocks"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}
