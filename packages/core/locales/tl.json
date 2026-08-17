@@ -75,5 +75,27 @@
   "search": "Search",
   "social": "Social",
   "acquisition": "Bagong gumagamit",
-  "retention": "Bumabalik"
+  "retention": "Bumabalik",
+
+  "profile.print": "Print",
+  "finish": "Finish",
+  "stock": "Papel",
+  "structure": "Istruktura",
+  "coverage": "Saklaw tinta",
+  "foil": "Foil",
+  "matte": "Matte",
+  "gloss": "Gloss",
+  "kraft": "Kraft",
+  "white": "Puti",
+  "fold": "Tiklop",
+  "assemble": "Buuin",
+  "full": "Buo",
+  "partial": "Bahagi",
+  "none": "Wala",
+  "gold": "Ginto",
+  "rehearsal.proofprint": "Proof print",
+  "pnr.printorder": "Print order",
+  "scope.design": "Disenyo",
+  "scope.dieline": "Dieline",
+  "scope.print": "Pag-print"
 }

@@ -75,5 +75,27 @@
   "search": "Busca",
   "social": "Social",
   "acquisition": "Novos usuários",
-  "retention": "Recorrentes"
+  "retention": "Recorrentes",
+
+  "profile.print": "Impressão",
+  "finish": "Acabamento",
+  "stock": "Papel",
+  "structure": "Estrutura",
+  "coverage": "Cobertura",
+  "foil": "Foil",
+  "matte": "Fosco",
+  "gloss": "Brilho",
+  "kraft": "Kraft",
+  "white": "Branco",
+  "fold": "Dobra",
+  "assemble": "Montagem",
+  "full": "Total",
+  "partial": "Parcial",
+  "none": "Nenhum",
+  "gold": "Ouro",
+  "rehearsal.proofprint": "Prova impressa",
+  "pnr.printorder": "Ordem impressão",
+  "scope.design": "Design",
+  "scope.dieline": "Faca",
+  "scope.print": "Impressão"
 }

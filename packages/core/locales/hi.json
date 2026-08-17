@@ -75,5 +75,27 @@
   "search": "सर्च",
   "social": "सोशल",
   "acquisition": "नए उपयोगकर्ता",
-  "retention": "लौटने वाले"
+  "retention": "लौटने वाले",
+
+  "profile.print": "प्रिंट",
+  "finish": "फ़िनिश",
+  "stock": "कागज़",
+  "structure": "संरचना",
+  "coverage": "कवरेज",
+  "foil": "फ़ॉइल",
+  "matte": "मैट",
+  "gloss": "ग्लॉस",
+  "kraft": "क्राफ़्ट",
+  "white": "सफ़ेद",
+  "fold": "फ़ोल्ड",
+  "assemble": "असेंबल",
+  "full": "पूर्ण",
+  "partial": "आंशिक",
+  "none": "कोई नहीं",
+  "gold": "गोल्ड",
+  "rehearsal.proofprint": "प्रूफ़ प्रिंट",
+  "pnr.printorder": "प्रिंट ऑर्डर",
+  "scope.design": "डिज़ाइन",
+  "scope.dieline": "डाईलाइन",
+  "scope.print": "छपाई"
 }

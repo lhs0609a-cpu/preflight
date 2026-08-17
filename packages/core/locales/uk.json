@@ -75,5 +75,27 @@
   "search": "Пошук",
   "social": "Соцмережі",
   "acquisition": "Нові користувачі",
-  "retention": "Повернення"
+  "retention": "Повернення",
+
+  "profile.print": "Друк",
+  "finish": "Оздоблення",
+  "stock": "Папір",
+  "structure": "Структура",
+  "coverage": "Покриття",
+  "foil": "Фольга",
+  "matte": "Матове",
+  "gloss": "Глянцеве",
+  "kraft": "Крафт",
+  "white": "Білий",
+  "fold": "Згин",
+  "assemble": "Збирання",
+  "full": "Повне",
+  "partial": "Часткове",
+  "none": "Немає",
+  "gold": "Золото",
+  "rehearsal.proofprint": "Пробний друк",
+  "pnr.printorder": "Замовлення друку",
+  "scope.design": "Дизайн",
+  "scope.dieline": "Штанцформа",
+  "scope.print": "Друк"
 }

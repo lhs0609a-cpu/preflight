@@ -75,5 +75,27 @@
   "search": "Tìm kiếm",
   "social": "Mạng xã hội",
   "acquisition": "Người dùng mới",
-  "retention": "Quay lại"
+  "retention": "Quay lại",
+
+  "profile.print": "In ấn",
+  "finish": "Hoàn thiện",
+  "stock": "Giấy",
+  "structure": "Cấu trúc",
+  "coverage": "Độ phủ",
+  "foil": "Ép kim",
+  "matte": "Mờ",
+  "gloss": "Bóng",
+  "kraft": "Kraft",
+  "white": "Trắng",
+  "fold": "Gấp",
+  "assemble": "Lắp ráp",
+  "full": "Toàn phần",
+  "partial": "Một phần",
+  "none": "Không",
+  "gold": "Vàng",
+  "rehearsal.proofprint": "Bản in thử",
+  "pnr.printorder": "Lệnh in",
+  "scope.design": "Thiết kế",
+  "scope.dieline": "Khuôn bế",
+  "scope.print": "In"
 }

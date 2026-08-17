@@ -75,5 +75,27 @@
   "search": "Search",
   "social": "Social",
   "acquisition": "New users",
-  "retention": "Returning"
+  "retention": "Returning",
+
+  "profile.print": "Print",
+  "finish": "Finish",
+  "stock": "Stock",
+  "structure": "Structure",
+  "coverage": "Coverage",
+  "foil": "Foil",
+  "matte": "Matte",
+  "gloss": "Gloss",
+  "kraft": "Kraft",
+  "white": "White",
+  "fold": "Fold",
+  "assemble": "Assemble",
+  "full": "Full",
+  "partial": "Partial",
+  "none": "None",
+  "gold": "Gold",
+  "rehearsal.proofprint": "Proof print",
+  "pnr.printorder": "Print order",
+  "scope.design": "Design",
+  "scope.dieline": "Dieline",
+  "scope.print": "Printing"
 }

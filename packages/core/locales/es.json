@@ -75,5 +75,27 @@
   "search": "Búsqueda",
   "social": "Social",
   "acquisition": "Usuarios nuevos",
-  "retention": "Recurrentes"
+  "retention": "Recurrentes",
+
+  "profile.print": "Impresión",
+  "finish": "Acabado",
+  "stock": "Papel",
+  "structure": "Estructura",
+  "coverage": "Cobertura",
+  "foil": "Foil",
+  "matte": "Mate",
+  "gloss": "Brillo",
+  "kraft": "Kraft",
+  "white": "Blanco",
+  "fold": "Plegado",
+  "assemble": "Montaje",
+  "full": "Completa",
+  "partial": "Parcial",
+  "none": "Ninguno",
+  "gold": "Oro",
+  "rehearsal.proofprint": "Prueba impresa",
+  "pnr.printorder": "Orden impresión",
+  "scope.design": "Diseño",
+  "scope.dieline": "Troquel",
+  "scope.print": "Impresión"
 }

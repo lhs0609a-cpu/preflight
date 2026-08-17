@@ -1,0 +1,108 @@
+{
+  "$comment": "07 §5.1 Day 3 — image 렌더러로 추가하는 네 번째 유형. 이 파일과 로케일 JSON 말고는 아무것도 건드리지 않는다. 커밋에 .ts 가 0줄이어야 합격 기준 2를 만족한다.",
+  "slug": "print",
+  "nameKey": "profile.print",
+  "version": 1,
+  "visibility": "system",
+  "reversibility": "gated",
+  "marketplace": {
+    "categoryHints": ["packaging-design", "print-design"],
+    "offerTemplate": "offer.print.v1",
+    "listingTemplate": "listing.print.v1"
+  },
+  "policy": {
+    "pointOfNoReturnKey": "pnr.printorder",
+    "pnrStageIndex": 3
+  },
+  "rehearsal": {
+    "kind": "proof-print",
+    "labelKey": "rehearsal.proofprint",
+    "amountUsd": 45,
+    "checkpointKeys": ["finish", "stock", "coverage"]
+  },
+  "flow": [{ "key": "taste" }, { "key": "scope" }],
+  "blocks": [
+    {
+      "id": "taste",
+      "type": "PAIRWISE",
+      "labelKey": "block.taste",
+      "icon": "scale",
+      "lock": "hard",
+      "priceImpact": false,
+      "required": true,
+      "config": {
+        "kind": "PAIRWISE",
+        "renderer": "image",
+        "base": { "src": "/profiles/print/base.webp" },
+        "axes": [
+          {
+            "nameKey": "finish",
+            "field": "src",
+            "a": { "labelKey": "matte", "value": "/profiles/print/finish-a.webp", "measure": "matte lam · 5%" },
+            "b": { "labelKey": "gloss", "value": "/profiles/print/finish-b.webp", "measure": "gloss · 40%" }
+          },
+          {
+            "nameKey": "stock",
+            "field": "src",
+            "a": { "labelKey": "kraft", "value": "/profiles/print/stock-a.webp", "measure": "kraft 300g" },
+            "b": { "labelKey": "white", "value": "/profiles/print/stock-b.webp", "measure": "art 300g" }
+          },
+          {
+            "nameKey": "structure",
+            "field": "src",
+            "a": { "labelKey": "fold", "value": "/profiles/print/structure-a.webp", "measure": "one-touch bottom" },
+            "b": { "labelKey": "assemble", "value": "/profiles/print/structure-b.webp", "measure": "assembled" }
+          },
+          {
+            "nameKey": "coverage",
+            "field": "src",
+            "a": { "labelKey": "full", "value": "/profiles/print/coverage-a.webp", "measure": "88%" },
+            "b": { "labelKey": "partial", "value": "/profiles/print/coverage-b.webp", "measure": "26%" }
+          },
+          {
+            "nameKey": "foil",
+            "field": "src",
+            "a": { "labelKey": "none", "value": "/profiles/print/foil-a.webp", "measure": "no foil" },
+            "b": { "labelKey": "gold", "value": "/profiles/print/foil-b.webp", "measure": "logo area" }
+          }
+        ]
+      }
+    },
+    {
+      "id": "scope",
+      "type": "CHECKLIST",
+      "labelKey": "block.scope",
+      "icon": "file",
+      "lock": "hard",
+      "priceImpact": true,
+      "required": true,
+      "config": {
+        "kind": "CHECKLIST",
+        "mode": "scope",
+        "currency": "USD",
+        "baseWeeks": 2,
+        "items": [
+          { "labelKey": "scope.design", "icon": "square", "amountUsd": 180, "weeks": 1, "default": true },
+          { "labelKey": "scope.dieline", "icon": "grid", "amountUsd": 90, "weeks": 1, "default": true },
+          { "labelKey": "scope.print", "icon": "file", "amountUsd": 260, "weeks": 2, "default": false }
+        ]
+      }
+    }
+  ],
+  "opinions": [
+    {
+      "axisName": "finish",
+      "want": "matte",
+      "sayKey": "say.finish_matte",
+      "whyKey": "why.fingerprints",
+      "clientView": "compare-only"
+    },
+    {
+      "axisName": "coverage",
+      "want": "partial",
+      "sayKey": "say.coverage_partial",
+      "whyKey": "why.kraft_ink_absorption",
+      "clientView": "compare-only"
+    }
+  ]
+}
