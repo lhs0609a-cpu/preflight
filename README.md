@@ -33,6 +33,7 @@ pnpm test              # 단위 + 프로퍼티
 pnpm check:wordless    # G-5
 pnpm schema:generate   # Zod → profile.schema.json 재생성
 pnpm labels:check      # 8 로케일 × 3단어 이내
+pnpm profiles:check    # 전 프로파일 컴파일 (라벨·렌더러 필드·아이콘 주입)
 ```
 
 `profile:` 로 시작하는 커밋은 데이터만 담아야 한다.
