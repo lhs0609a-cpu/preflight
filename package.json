@@ -11,10 +11,11 @@
     "schema:generate": "tsx tools/ci/generate-schema.ts",
     "schema:check": "tsx tools/ci/generate-schema.ts --check",
     "labels:check": "tsx tools/ci/check-labels.ts",
+    "profiles:check": "tsx tools/ci/check-profiles.ts",
     "test": "vitest run",
     "check:wordless": "tsx tools/ci/check-wordless.ts",
     "check:data-only": "node tools/ci/check-data-only.mjs",
-    "gate": "pnpm lint && pnpm typecheck && pnpm schema:check && pnpm labels:check && pnpm test && pnpm check:wordless"
+    "gate": "pnpm lint && pnpm typecheck && pnpm schema:check && pnpm labels:check && pnpm profiles:check && pnpm test && pnpm check:wordless"
   },
   "devDependencies": {
     "@preflight/core": "workspace:*",

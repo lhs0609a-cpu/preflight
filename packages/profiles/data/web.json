@@ -1,0 +1,190 @@
+{
+  "slug": "web",
+  "nameKey": "profile.web",
+  "version": 1,
+  "visibility": "system",
+  "reversibility": "cheap",
+  "marketplace": {
+    "categoryHints": ["web-development", "website-design", "landing-page"],
+    "offerTemplate": "offer.web.v1",
+    "listingTemplate": "listing.web.v1"
+  },
+  "policy": {},
+  "flow": [{ "key": "taste" }, { "key": "structure" }, { "key": "scope" }, { "key": "assets" }],
+  "blocks": [
+    {
+      "id": "taste",
+      "type": "PAIRWISE",
+      "labelKey": "block.taste",
+      "icon": "scale",
+      "lock": "hard",
+      "priceImpact": false,
+      "required": true,
+      "config": {
+        "kind": "PAIRWISE",
+        "renderer": "web",
+        "base": { "pad": 32, "c": "#7E8F86", "sf": true, "rows": 2, "radius": 0, "hero": true },
+        "axes": [
+          {
+            "nameKey": "spacing",
+            "field": "pad",
+            "a": { "labelKey": "wide", "value": 32, "measure": "padding 32px" },
+            "b": { "labelKey": "tight", "value": 12, "measure": "padding 12px" }
+          },
+          {
+            "nameKey": "saturation",
+            "field": "c",
+            "a": { "labelKey": "low", "value": "#7E8F86", "measure": "#7E8F86 · 11%" },
+            "b": { "labelKey": "high", "value": "#1C6FC4", "measure": "#1C6FC4 · 78%" }
+          },
+          {
+            "nameKey": "type",
+            "field": "sf",
+            "a": { "labelKey": "serif", "value": true, "measure": "serif" },
+            "b": { "labelKey": "sans", "value": false, "measure": "sans-serif" }
+          },
+          {
+            "nameKey": "density",
+            "field": "rows",
+            "a": { "labelKey": "low", "value": 2, "measure": "2 blocks" },
+            "b": { "labelKey": "high", "value": 6, "measure": "6 blocks" }
+          },
+          {
+            "nameKey": "corner",
+            "field": "radius",
+            "a": { "labelKey": "sharp", "value": 0, "measure": "radius 0px" },
+            "b": { "labelKey": "round", "value": 12, "measure": "radius 12px" }
+          },
+          {
+            "nameKey": "focus",
+            "field": "hero",
+            "a": { "labelKey": "image", "value": true, "measure": "hero image" },
+            "b": { "labelKey": "text", "value": false, "measure": "no hero" }
+          }
+        ]
+      }
+    },
+    {
+      "id": "structure",
+      "type": "PICK_N",
+      "labelKey": "block.structure",
+      "icon": "grid",
+      "lock": "hard",
+      "priceImpact": false,
+      "required": true,
+      "config": {
+        "kind": "PICK_N",
+        "style": "wireframe",
+        "fidelity": "low",
+        "options": [
+          {
+            "labelKey": "structure.symptom",
+            "icon": "triangle",
+            "measure": "symptom-led order",
+            "wireframe": [["h", 1], ["b", 3], ["s", 2], ["b", 2]]
+          },
+          {
+            "labelKey": "structure.category",
+            "icon": "grid",
+            "measure": "category-led order",
+            "wireframe": [["h", 1], ["s", 4], ["b", 2]]
+          },
+          {
+            "labelKey": "structure.person",
+            "icon": "circle",
+            "measure": "person-led order",
+            "wireframe": [["h", 1], ["b", 2], ["s", 3], ["b", 1]]
+          }
+        ]
+      }
+    },
+    {
+      "id": "scope",
+      "type": "CHECKLIST",
+      "labelKey": "block.scope",
+      "icon": "file",
+      "lock": "hard",
+      "priceImpact": true,
+      "required": true,
+      "config": {
+        "kind": "CHECKLIST",
+        "mode": "scope",
+        "currency": "USD",
+        "baseWeeks": 2,
+        "items": [
+          { "labelKey": "scope.main", "icon": "grid", "amountUsd": 180, "weeks": 2, "default": true },
+          { "labelKey": "scope.mobile", "icon": "square", "amountUsd": 80, "weeks": 1, "default": true },
+          { "labelKey": "scope.booking", "icon": "clock", "amountUsd": 120, "weeks": 1, "default": true },
+          { "labelKey": "scope.photo", "icon": "picture", "amountUsd": 60, "weeks": 1, "default": false },
+          { "labelKey": "scope.video", "icon": "triangle", "amountUsd": 150, "weeks": 1, "default": false },
+          { "labelKey": "scope.i18n", "icon": "globe", "amountUsd": 90, "weeks": 1, "default": false }
+        ]
+      }
+    },
+    {
+      "id": "assets",
+      "type": "CHECKLIST",
+      "labelKey": "block.assets",
+      "icon": "upload",
+      "lock": "soft",
+      "priceImpact": true,
+      "required": false,
+      "config": {
+        "kind": "CHECKLIST",
+        "mode": "assets",
+        "currency": "USD",
+        "baseWeeks": 0,
+        "items": [
+          {
+            "labelKey": "asset.logo",
+            "icon": "square",
+            "amountUsd": 0,
+            "weeks": 0,
+            "default": false,
+            "blocksStart": true
+          },
+          {
+            "labelKey": "asset.copy",
+            "icon": "file",
+            "amountUsd": 0,
+            "weeks": 0,
+            "default": false,
+            "fallbackAmountUsd": 40
+          },
+          {
+            "labelKey": "asset.photos",
+            "icon": "picture",
+            "amountUsd": 0,
+            "weeks": 0,
+            "default": false,
+            "fallbackAmountUsd": 60
+          },
+          {
+            "labelKey": "asset.domain",
+            "icon": "globe",
+            "amountUsd": 0,
+            "weeks": 0,
+            "default": false,
+            "fallbackAmountUsd": 30
+          }
+        ]
+      }
+    }
+  ],
+  "opinions": [
+    {
+      "axisName": "density",
+      "want": "high",
+      "sayKey": "say.density_high",
+      "whyKey": "why.seo_visibility",
+      "clientView": "compare-only"
+    },
+    {
+      "axisName": "focus",
+      "want": "image",
+      "sayKey": "say.focus_image",
+      "whyKey": "why.trust_conversion",
+      "clientView": "compare-only"
+    }
+  ]
+}

@@ -33,12 +33,21 @@ export type RenderNode =
   | ({ readonly k: 'box'; readonly fill: TokenRef; readonly r?: number } & Rect)
   /** 판별 대상 외 정보. 본문은 회색 바로 지운다 (02 §4.1) */
   | ({ readonly k: 'bar'; readonly fill: TokenRef } & Rect)
+  /** 임의 색 면. 축이 색일 때만 쓴다 — 나머지 면은 전부 토큰이다 */
+  | ({ readonly k: 'swatch'; readonly color: string; readonly r?: number } & Rect)
+  /**
+   * 서체 견본. 내용이 노드 종류로 고정돼 있어("Aa") 작성자가 문자열을 넣을 수 없다.
+   *
+   * serif/sans 축은 회색 바로 표현할 수 없다. 그렇다고 label 을 붙이면
+   * 카드에 축 설명이 생겨 재인 과제가 회상 과제로 바뀐다 (02 §4.1).
+   * 견본은 축 자체를 보여줄 뿐 이름을 말하지 않는다.
+   */
   | {
-      readonly k: 'swatch'
+      readonly k: 'specimen'
       readonly x: number
       readonly y: number
       readonly size: number
-      readonly color: string
+      readonly serif: boolean
     }
   | ({ readonly k: 'img'; readonly src: AssetRef; readonly fit: 'cover' | 'contain' } & Rect)
   | {

@@ -29,6 +29,7 @@ export const ICONS = [
   // 사물
   'file',
   'picture',
+  'globe',
   'download',
   'upload',
   'grid',

@@ -4,6 +4,9 @@
     "ProfileSource": {
       "type": "object",
       "properties": {
+        "$comment": {
+          "type": "string"
+        },
         "slug": {
           "type": "string",
           "minLength": 1,
@@ -85,6 +88,41 @@
           },
           "additionalProperties": false,
           "default": {}
+        },
+        "rehearsal": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "test-shot",
+                "proof-print",
+                "mockup",
+                "sample",
+                "demo-cut"
+              ]
+            },
+            "labelKey": {
+              "$ref": "#/definitions/ProfileSource/properties/nameKey"
+            },
+            "amountUsd": {
+              "type": "number",
+              "minimum": 0
+            },
+            "checkpointKeys": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ProfileSource/properties/nameKey"
+              },
+              "default": []
+            }
+          },
+          "required": [
+            "kind",
+            "labelKey",
+            "amountUsd"
+          ],
+          "additionalProperties": false
         },
         "flow": {
           "type": "array",
@@ -561,14 +599,7 @@
                         "const": "REHEARSAL"
                       },
                       "rehearsalKind": {
-                        "type": "string",
-                        "enum": [
-                          "test-shot",
-                          "proof-print",
-                          "mockup",
-                          "sample",
-                          "demo-cut"
-                        ]
+                        "$ref": "#/definitions/ProfileSource/properties/rehearsal/properties/kind"
                       },
                       "labelKey": {
                         "$ref": "#/definitions/ProfileSource/properties/nameKey"

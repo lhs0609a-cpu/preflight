@@ -1,0 +1,86 @@
+{
+  "$comment": "M0 검증 전용. reversibility='outcome' 경로를 덮기 위한 세 번째 프로파일이며 v1 에서는 오픈하지 않는다 (12 §1.3). 렌더러가 image 인 것은 우회가 아니라 의도다 — image 경로가 M0 에서 실제로 쓰이는 1급 경로임을 증명한다.",
+  "slug": "seo",
+  "nameKey": "profile.seo",
+  "version": 1,
+  "visibility": "system",
+  "reversibility": "outcome",
+  "marketplace": {
+    "categoryHints": ["seo", "content-marketing"],
+    "offerTemplate": "offer.seo.v1",
+    "listingTemplate": "listing.seo.v1"
+  },
+  "policy": {},
+  "flow": [{ "key": "taste" }, { "key": "scope" }],
+  "blocks": [
+    {
+      "id": "taste",
+      "type": "PAIRWISE",
+      "labelKey": "block.taste",
+      "icon": "scale",
+      "lock": "hard",
+      "priceImpact": false,
+      "required": true,
+      "config": {
+        "kind": "PAIRWISE",
+        "renderer": "image",
+        "base": { "src": "/profiles/seo/base.webp" },
+        "axes": [
+          {
+            "nameKey": "channel",
+            "field": "src",
+            "a": { "labelKey": "search", "value": "/profiles/seo/channel-a.webp", "measure": "SERP-led" },
+            "b": { "labelKey": "social", "value": "/profiles/seo/channel-b.webp", "measure": "feed-led" }
+          },
+          {
+            "nameKey": "cadence",
+            "field": "src",
+            "a": { "labelKey": "high", "value": "/profiles/seo/cadence-a.webp", "measure": "20/mo" },
+            "b": { "labelKey": "low", "value": "/profiles/seo/cadence-b.webp", "measure": "6/mo" }
+          },
+          {
+            "nameKey": "target",
+            "field": "src",
+            "a": { "labelKey": "acquisition", "value": "/profiles/seo/target-a.webp", "measure": "new" },
+            "b": { "labelKey": "retention", "value": "/profiles/seo/target-b.webp", "measure": "returning" }
+          },
+          {
+            "nameKey": "paid",
+            "field": "src",
+            "a": { "labelKey": "high", "value": "/profiles/seo/paid-a.webp", "measure": "78% ads" },
+            "b": { "labelKey": "low", "value": "/profiles/seo/paid-b.webp", "measure": "18% ads" }
+          }
+        ]
+      }
+    },
+    {
+      "id": "scope",
+      "type": "CHECKLIST",
+      "labelKey": "block.scope",
+      "icon": "file",
+      "lock": "hard",
+      "priceImpact": true,
+      "required": true,
+      "config": {
+        "kind": "CHECKLIST",
+        "mode": "scope",
+        "currency": "USD",
+        "baseWeeks": 4,
+        "items": [
+          { "labelKey": "scope.audit", "icon": "scale", "amountUsd": 200, "weeks": 1, "default": true },
+          { "labelKey": "scope.content", "icon": "file", "amountUsd": 600, "weeks": 4, "default": true },
+          { "labelKey": "scope.report", "icon": "bar", "amountUsd": 150, "weeks": 1, "default": false }
+        ]
+      }
+    }
+  ],
+  "opinions": [
+    {
+      "axisName": "cadence",
+      "want": "high",
+      "sayKey": "say.cadence_high",
+      "whyKey": "why.ranking_velocity",
+      "clientView": "compare-only"
+    }
+  ]
+}

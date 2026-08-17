@@ -46,6 +46,7 @@ const ICON_PATH: Partial<Record<IconKey, string>> = {
   bar: 'M4 10h2v3H4z M7 7h2v6H7z M10 4h2v9h-2z',
   file: 'M5 3h4l2 2v8H5z M9 3v2h2',
   picture: 'M3 4h10v8H3z M5 10l2-2 2 2 2-3',
+  globe: 'M8 3a5 5 0 1 0 0 10A5 5 0 0 0 8 3z M3 8h10 M8 3c-3 3-3 7 0 10 M8 3c3 3 3 7 0 10',
   currency: 'M8 3v10 M10 5.5C10 4.7 9.1 4 8 4S6 4.7 6 5.5 7 7 8 7.5s2 1 2 2S9.1 12 8 12s-2-.7-2-1.5',
 }
 
@@ -75,7 +76,13 @@ function nodeToSvg(node: RenderNode, dict: Readonly<Record<string, string>>): st
     case 'bar':
       return `<rect x="${node.x}" y="${node.y}" width="${node.w}" height="${node.h}" fill="${COLOR[node.fill]}"/>`
     case 'swatch':
-      return `<rect x="${node.x}" y="${node.y}" width="${node.size}" height="${node.size}" fill="${esc(node.color)}"/>`
+      return `<rect x="${node.x}" y="${node.y}" width="${node.w}" height="${node.h}" rx="${node.r ?? 0}" fill="${esc(node.color)}"/>`
+    case 'specimen':
+      // 내용은 노드 종류가 정한다. 작성자가 임의 문자열을 넣을 수 없다.
+      return (
+        `<text x="${node.x}" y="${node.y}" font-size="${node.size}" ` +
+        `font-family="${node.serif ? 'serif' : 'sans-serif'}" fill="${COLOR.ink}">Aa</text>`
+      )
     case 'img':
       return (
         `<image x="${node.x}" y="${node.y}" width="${node.w}" height="${node.h}" ` +

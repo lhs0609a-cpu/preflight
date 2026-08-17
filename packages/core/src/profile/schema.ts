@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { BlockSchema, LabelKeyRefSchema } from '../block/types.ts'
+import { BlockSchema, LabelKeyRefSchema, RehearsalKindSchema } from '../block/types.ts'
 
 /** 00 §2.4 — 이 한 필드가 나머지 정책을 결정한다. */
 export const REVERSIBILITY = ['cheap', 'gated', 'outcome'] as const
@@ -40,8 +40,20 @@ export const PolicyOverrideSchema = z
   .strict()
 export type PolicyOverride = z.infer<typeof PolicyOverrideSchema>
 
+export const RehearsalParamsSchema = z
+  .object({
+    kind: RehearsalKindSchema,
+    labelKey: LabelKeyRefSchema,
+    amountUsd: z.number().nonnegative(),
+    checkpointKeys: z.array(LabelKeyRefSchema).default([]),
+  })
+  .strict()
+export type RehearsalParams = z.infer<typeof RehearsalParamsSchema>
+
 export const ProfileSourceSchema = z
   .object({
+    /** 데이터 파일에 주석을 남기기 위한 자리. 런타임에서 쓰이지 않는다. */
+    $comment: z.string().optional(),
     slug: z
       .string()
       .min(1)
@@ -55,6 +67,16 @@ export const ProfileSourceSchema = z
 
     marketplace: MarketplaceMapSchema,
     policy: PolicyOverrideSchema.default({}),
+    /**
+     * 리허설의 **파라미터**다. 존재 여부가 아니다.
+     *
+     * 어떤 리허설인지(테스트컷 · 교정쇄 · 목업)는 거래 유형의 도메인 지식이라
+     * reversibility 로 파생할 수 없다. 반면 리허설이 필요한지, 어디에 꽂히는지,
+     * PNR 을 막는지는 전부 reversibility 가 정한다.
+     *
+     * 이 선을 넘어 "리허설 블록"을 원본에 직접 쓰면 07 합격 기준 4가 깨진다.
+     */
+    rehearsal: RehearsalParamsSchema.optional(),
     flow: z.array(z.object({ key: z.string().min(1) })).min(1),
     blocks: z.array(BlockSchema).min(1),
     opinions: z.array(ProOpinionSchema).default([]),

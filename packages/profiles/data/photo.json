@@ -1,0 +1,140 @@
+{
+  "slug": "photo",
+  "nameKey": "profile.photo",
+  "version": 1,
+  "visibility": "system",
+  "reversibility": "gated",
+  "marketplace": {
+    "categoryHints": ["product-photography", "photo-retouching"],
+    "offerTemplate": "offer.photo.v1",
+    "listingTemplate": "listing.photo.v1"
+  },
+  "policy": {
+    "pointOfNoReturnKey": "pnr.shootend",
+    "pnrStageIndex": 2
+  },
+  "rehearsal": {
+    "kind": "test-shot",
+    "labelKey": "rehearsal.testshot",
+    "amountUsd": 60,
+    "checkpointKeys": ["light", "warmth", "angle"]
+  },
+  "flow": [{ "key": "taste" }, { "key": "scope" }, { "key": "assets" }],
+  "blocks": [
+    {
+      "id": "taste",
+      "type": "PAIRWISE",
+      "labelKey": "block.taste",
+      "icon": "scale",
+      "lock": "hard",
+      "priceImpact": false,
+      "required": true,
+      "config": {
+        "kind": "PAIRWISE",
+        "renderer": "photo",
+        "base": { "light": "natural", "wb": 0, "angle": 15, "aperture": 1.8, "props": false },
+        "axes": [
+          {
+            "nameKey": "light",
+            "field": "light",
+            "a": { "labelKey": "natural", "value": "natural", "measure": "diffused 5200K" },
+            "b": { "labelKey": "strobe", "value": "strobe", "measure": "2-head 5600K" }
+          },
+          {
+            "nameKey": "warmth",
+            "field": "wb",
+            "a": { "labelKey": "warm", "value": 400, "measure": "WB +400K" },
+            "b": { "labelKey": "neutral", "value": 0, "measure": "WB base" }
+          },
+          {
+            "nameKey": "angle",
+            "field": "angle",
+            "a": { "labelKey": "topdown", "value": 90, "measure": "90°" },
+            "b": { "labelKey": "eyelevel", "value": 15, "measure": "15°" }
+          },
+          {
+            "nameKey": "depth",
+            "field": "aperture",
+            "a": { "labelKey": "shallow", "value": 1.8, "measure": "f/1.8" },
+            "b": { "labelKey": "deep", "value": 8, "measure": "f/8" }
+          },
+          {
+            "nameKey": "props",
+            "field": "props",
+            "a": { "labelKey": "styled", "value": true, "measure": "props+hands" },
+            "b": { "labelKey": "bare", "value": false, "measure": "bare set" }
+          }
+        ]
+      }
+    },
+    {
+      "id": "scope",
+      "type": "CHECKLIST",
+      "labelKey": "block.scope",
+      "icon": "file",
+      "lock": "hard",
+      "priceImpact": true,
+      "required": true,
+      "config": {
+        "kind": "CHECKLIST",
+        "mode": "scope",
+        "currency": "USD",
+        "baseWeeks": 1,
+        "items": [
+          { "labelKey": "scope.shoot", "icon": "picture", "amountUsd": 240, "weeks": 1, "default": true },
+          { "labelKey": "scope.retouch", "icon": "refresh", "amountUsd": 120, "weeks": 1, "default": true },
+          { "labelKey": "scope.extra", "icon": "plus", "amountUsd": 80, "weeks": 1, "default": false }
+        ]
+      }
+    },
+    {
+      "id": "assets",
+      "type": "CHECKLIST",
+      "labelKey": "block.assets",
+      "icon": "upload",
+      "lock": "soft",
+      "priceImpact": true,
+      "required": false,
+      "config": {
+        "kind": "CHECKLIST",
+        "mode": "assets",
+        "currency": "USD",
+        "baseWeeks": 0,
+        "items": [
+          {
+            "labelKey": "asset.product",
+            "icon": "square",
+            "amountUsd": 0,
+            "weeks": 0,
+            "default": false,
+            "blocksStart": true
+          },
+          {
+            "labelKey": "asset.brief",
+            "icon": "file",
+            "amountUsd": 0,
+            "weeks": 0,
+            "default": false,
+            "fallbackAmountUsd": 40
+          }
+        ]
+      }
+    }
+  ],
+  "opinions": [
+    {
+      "axisName": "light",
+      "want": "natural",
+      "sayKey": "say.light_natural",
+      "whyKey": "why.texture",
+      "clientView": "compare-only"
+    },
+    {
+      "axisName": "depth",
+      "want": "shallow",
+      "sayKey": "say.depth_shallow",
+      "whyKey": "why.background_control",
+      "clientView": "compare-only"
+    }
+  ]
+}
