@@ -14,7 +14,7 @@ export async function GET(
   ctx: { params: Promise<{ token: string }> },
 ): Promise<Response> {
   const { token } = await ctx.params
-  const built = await runtime().service.specOf(token)
+  const built = await (await runtime()).service.specOf(token)
   if (built === null) return new Response('not settled', { status: 404 })
 
   const pdf = textToPdf(renderSheet(built.spec), { title: built.spec.no })

@@ -43,12 +43,13 @@ export interface FlowState {
 }
 
 async function configOf(token: string, blockId: string): Promise<BlockConfig> {
-  const record = await runtime().service.record(token)
+  const rt = await runtime()
+  const record = await rt.service.record(token)
   return record.profile.blocks.find((b) => b.id === blockId)!.config
 }
 
 async function stateOf(token: string): Promise<FlowState> {
-  const svc = runtime().service
+  const svc = (await runtime()).service
   const view = await svc.view(token)
   const cursor = view.cursor
   const block = view.blocks.find((b) => b.blockId === cursor)
@@ -85,7 +86,7 @@ async function stateOf(token: string): Promise<FlowState> {
 }
 
 export async function openSession(token: string): Promise<FlowState> {
-  await runtime().service.open(token)
+  await (await runtime()).service.open(token)
   return stateOf(token)
 }
 
@@ -94,22 +95,22 @@ export async function readState(token: string): Promise<FlowState> {
 }
 
 export async function answer(token: string, blockId: string, side: Side): Promise<FlowState> {
-  await runtime().service.answer(token, blockId, side)
+  await (await runtime()).service.answer(token, blockId, side)
   return stateOf(token)
 }
 
 export async function undo(token: string, blockId: string): Promise<FlowState> {
-  await runtime().service.undo(token, blockId)
+  await (await runtime()).service.undo(token, blockId)
   return stateOf(token)
 }
 
 export async function pick(token: string, blockId: string, index: number): Promise<FlowState> {
-  await runtime().service.pick(token, blockId, index)
+  await (await runtime()).service.pick(token, blockId, index)
   return stateOf(token)
 }
 
 export async function settleBlock(token: string, blockId: string): Promise<FlowState> {
-  await runtime().service.settleBlock(token, blockId)
+  await (await runtime()).service.settleBlock(token, blockId)
   return stateOf(token)
 }
 
@@ -117,7 +118,7 @@ export async function setScope(
   token: string,
   items: Record<string, boolean>,
 ): Promise<FlowState> {
-  await runtime().service.setScope(token, items)
+  await (await runtime()).service.setScope(token, items)
   return stateOf(token)
 }
 
@@ -128,7 +129,8 @@ export interface ConfirmView {
 
 /** C-03 — 전 축을 반영한 합성 미리보기와 수치 목록 */
 export async function confirmView(token: string, blockId: string): Promise<ConfirmView> {
-  const record = await runtime().service.record(token)
+  const rt = await runtime()
+  const record = await rt.service.record(token)
   const config = await configOf(token, blockId)
   if (config.kind !== 'PAIRWISE') throw new Error('BLOCK_NOT_PAIRWISE')
   const choices = (record.choices[blockId] ?? []) as Side[]
@@ -139,7 +141,7 @@ export async function confirmView(token: string, blockId: string): Promise<Confi
 }
 
 export async function settle(token: string): Promise<Spec> {
-  return (await runtime().service.settle(token)).spec
+  return (await (await runtime()).service.settle(token)).spec
 }
 
 export interface IssuedLink {
@@ -150,7 +152,7 @@ export interface IssuedLink {
 }
 
 export async function issueLink(slug: string, clientLabel: string): Promise<IssuedLink> {
-  const rt = runtime()
+  const rt = await runtime()
   const profile = rt.profiles.find((p) => p.slug === slug)
   if (!profile) throw new Error('PROFILE_NOT_FOUND')
   const r = await rt.service.issue({ proId: rt.proId, profile, clientLabel })
@@ -173,7 +175,7 @@ export interface SessionRow {
 }
 
 export async function listSessions(): Promise<SessionRow[]> {
-  const rt = runtime()
+  const rt = await runtime()
   const records = await rt.service.store.listByPro(rt.proId)
   return Promise.all(
     records.map(async (r) => {
@@ -204,7 +206,7 @@ export interface Deliverables {
 }
 
 export async function deliverables(token: string, locale = 'ko'): Promise<Deliverables | null> {
-  const rt = runtime()
+  const rt = await runtime()
   const built = await rt.service.specOf(token)
   if (built === null) return null
 
@@ -233,7 +235,7 @@ export async function signup(input: {
   locale: string
   timezone: string
 }): Promise<ProView> {
-  const pro = await runtime().proService.signup(input)
+  const pro = await (await runtime()).proService.signup(input)
   return view(pro)
 }
 
@@ -243,7 +245,7 @@ export async function registerBilling(
   provider: string,
   billingKey: string,
 ): Promise<ProView> {
-  const pro = await runtime().proService.registerBilling(proId, { provider, billingKey })
+  const pro = await (await runtime()).proService.registerBilling(proId, { provider, billingKey })
   return view(pro)
 }
 

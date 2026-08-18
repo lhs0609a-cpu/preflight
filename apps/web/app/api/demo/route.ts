@@ -14,7 +14,7 @@ export async function GET(req: Request): Promise<NextResponse> {
     return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 })
   }
   const slug = new URL(req.url).searchParams.get('slug') ?? 'web'
-  const rt = runtime()
+  const rt = await runtime()
   const profile = rt.profiles.find((p) => p.slug === slug)
   if (!profile) return NextResponse.json({ error: 'PROFILE_NOT_FOUND', slug }, { status: 404 })
 

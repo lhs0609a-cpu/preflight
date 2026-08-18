@@ -11,7 +11,7 @@ import { ProConsole } from './ProConsole.tsx'
 export const dynamic = 'force-dynamic'
 
 export default async function ProPage() {
-  const rt = runtime()
+  const rt = await runtime()
   const rows = await listSessions()
   return (
     <ProConsole

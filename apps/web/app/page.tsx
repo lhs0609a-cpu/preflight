@@ -14,8 +14,8 @@ import { serializedPairAt } from '@preflight/core'
 
 export const dynamic = 'force-dynamic'
 
-export default function Landing() {
-  const rt = runtime()
+export default async function Landing() {
+  const rt = await runtime()
   // 슬러그로 고르지 않는다. 유형이 늘 때 이 파일을 고쳐야 하면 07 합격 기준 2가
   // 깨진다 — eslint 가 실제로 이 자리를 잡아냈다.
   const demo = rt.profiles.find((p) =>
