@@ -9,7 +9,7 @@ import { runtime } from '../../_lib/runtime.ts'
 
 export const dynamic = 'force-dynamic'
 
-export function GET(req: Request): NextResponse {
+export async function GET(req: Request): Promise<NextResponse> {
   if (process.env.NODE_ENV === 'production' && process.env['PF_ALLOW_DEMO'] !== '1') {
     return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 })
   }
@@ -18,6 +18,6 @@ export function GET(req: Request): NextResponse {
   const profile = rt.profiles.find((p) => p.slug === slug)
   if (!profile) return NextResponse.json({ error: 'PROFILE_NOT_FOUND', slug }, { status: 404 })
 
-  const issued = rt.service.issue({ profile, clientLabel: 'Demo' })
+  const issued = await rt.service.issue({ proId: rt.proId, profile, clientLabel: 'Demo' })
   return NextResponse.redirect(new URL(`/s/${issued.token}`, req.url), 303)
 }

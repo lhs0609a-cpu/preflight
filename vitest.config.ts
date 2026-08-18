@@ -7,6 +7,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@preflight/catalog': r('./packages/catalog/src/index.ts'),
+      '@preflight/db': r('./packages/db/src/index.ts'),
       '@preflight/core': r('./packages/core/src/index.ts'),
       '@preflight/render': r('./packages/render/src/index.ts'),
       '@preflight/tokens': r('./packages/tokens/src/index.ts'),

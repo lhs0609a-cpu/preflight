@@ -18,9 +18,15 @@ importers:
         specifier: ^3.24.1
         version: 3.25.2(zod@3.25.76)
     devDependencies:
+      '@electric-sql/pglite':
+        specifier: ^0.5.5
+        version: 0.5.5
       '@preflight/core':
         specifier: workspace:*
         version: link:packages/core
+      '@preflight/db':
+        specifier: workspace:*
+        version: link:packages/db
       '@preflight/render':
         specifier: workspace:*
         version: link:packages/render
@@ -76,11 +82,59 @@ importers:
         specifier: ^2.1.8
         version: 2.1.9(@types/node@22.20.1)(jsdom@25.0.1)
 
+  apps/web:
+    dependencies:
+      '@preflight/catalog':
+        specifier: workspace:*
+        version: link:../../packages/catalog
+      '@preflight/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@preflight/render':
+        specifier: workspace:*
+        version: link:../../packages/render
+      '@preflight/session':
+        specifier: workspace:*
+        version: link:../../packages/session
+      '@preflight/tokens':
+        specifier: workspace:*
+        version: link:../../packages/tokens
+      '@preflight/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+      next:
+        specifier: ^16.3.1
+        version: 16.3.1(@types/node@22.20.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      react:
+        specifier: ^19.2.8
+        version: 19.2.8
+      react-dom:
+        specifier: ^19.2.8
+        version: 19.2.8(react@19.2.8)
+
+  packages/catalog:
+    dependencies:
+      '@preflight/core':
+        specifier: workspace:*
+        version: link:../core
+      '@preflight/render':
+        specifier: workspace:*
+        version: link:../render
+
   packages/core:
     dependencies:
       zod:
         specifier: ^3.24.1
         version: 3.25.76
+
+  packages/db:
+    dependencies:
+      '@preflight/core':
+        specifier: workspace:*
+        version: link:../core
+      '@preflight/session':
+        specifier: workspace:*
+        version: link:../session
 
   packages/profiles: {}
 
@@ -101,9 +155,15 @@ importers:
 
   packages/testkit:
     dependencies:
+      '@preflight/catalog':
+        specifier: workspace:*
+        version: link:../catalog
       '@preflight/core':
         specifier: workspace:*
         version: link:../core
+      '@preflight/db':
+        specifier: workspace:*
+        version: link:../db
       '@preflight/render':
         specifier: workspace:*
         version: link:../render
@@ -166,6 +226,9 @@ packages:
   '@csstools/css-tokenizer@3.0.4':
     resolution: {integrity: sha512-Vd/9EVDiu6PPJt9yAh6roZP6El1xHrdvIVGjyBsHR0RYwNHgL7FJPyIIW4fANJNG6FtyZfvlRPpFI4ZM/lubvw==}
     engines: {node: '>=18'}
+
+  '@electric-sql/pglite@0.5.5':
+    resolution: {integrity: sha512-QeZ+oB7QaU4EJj2awrB8hwFZ5TXxLRBQ9Gfq0dQauYDdWsRtuWRCERgtri35vRfL07KQHlVlc/4Qxvn7a5AXeA==}
 
   '@emnapi/runtime@1.11.3':
     resolution: {integrity: sha512-Xz4Tpyki7XyrpbUK1jR1AhdAdaXyhhY4lZ3neLodmhpuWfy2PAQN5B46sAiU4liOXGLkHypn/qU+jvfWSCYYLA==}
@@ -1853,6 +1916,8 @@ snapshots:
       '@csstools/css-tokenizer': 3.0.4
 
   '@csstools/css-tokenizer@3.0.4': {}
+
+  '@electric-sql/pglite@0.5.5': {}
 
   '@emnapi/runtime@1.11.3':
     dependencies:

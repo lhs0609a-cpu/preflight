@@ -7,15 +7,19 @@
  * 개발 서버의 HMR 이 모듈을 다시 평가해도 세션이 날아가지 않도록
  * globalThis 에 매단다.
  */
-import { InMemorySessionStore, SessionService } from '@preflight/session'
+import { InMemoryProStore, InMemorySessionStore, SessionService } from '@preflight/session'
 import { compileAllProfiles, loadLabelBundle } from '@preflight/catalog'
 import { registerM0Renderers } from '@preflight/render'
 import type { CompiledProfile } from '@preflight/core'
 
 registerM0Renderers()
 
+/** M1 데모 계정. P-01 가입 화면이 붙으면 실제 세션 사용자로 대체된다. */
+export const DEMO_PRO_ID = 'pro-demo'
+
 interface Runtime {
   readonly service: SessionService
+  readonly proId: string
   readonly profiles: readonly CompiledProfile[]
   /** 클라이언트 화면이 쓰는 사전. 06 대로 영문 고정이다 — 클라이언트는 로케일이 없다 */
   readonly dict: Readonly<Record<string, string>>
@@ -31,6 +35,7 @@ function build(): Runtime {
   const state = { seq: 0 }
   const service = new SessionService({
     store: new InMemorySessionStore(),
+    pros: new InMemoryProStore(),
     baseUrl: process.env['PF_BASE_URL'] ?? 'http://localhost:3100',
     ids: {
       token: () => randomHex(24),
@@ -38,9 +43,22 @@ function build(): Runtime {
       seq: () => ++state.seq,
     },
   })
+  // FR-1.4 — 빌링키가 등록된 계정만 링크를 발급할 수 있다.
+  // 데모 계정은 등록된 것으로 세운다. 게이트 자체는 service.issue() 가 건다.
+  void service.pros.put({
+    id: DEMO_PRO_ID,
+    email: 'demo@pf.work',
+    displayName: 'Demo',
+    locale: 'ko',
+    timezone: 'Asia/Seoul',
+    state: 'ACTIVE',
+    billingVerified: true,
+  })
+
   const bundle = loadLabelBundle()
   return {
     service,
+    proId: DEMO_PRO_ID,
     profiles: compileAllProfiles(),
     dict: bundle.en,
     bundle,

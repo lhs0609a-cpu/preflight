@@ -21,7 +21,9 @@
     "start": "pnpm --filter @preflight/web start"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.5",
     "@preflight/core": "workspace:*",
+    "@preflight/db": "workspace:*",
     "@preflight/render": "workspace:*",
     "@preflight/session": "workspace:*",
     "@preflight/testkit": "workspace:*",

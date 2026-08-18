@@ -42,14 +42,14 @@ export interface FlowState {
   readonly awaitingConfirm: boolean
 }
 
-function configOf(token: string, blockId: string): BlockConfig {
-  const record = runtime().service.store.byToken(token)!
+async function configOf(token: string, blockId: string): Promise<BlockConfig> {
+  const record = await runtime().service.record(token)
   return record.profile.blocks.find((b) => b.id === blockId)!.config
 }
 
-function stateOf(token: string): FlowState {
+async function stateOf(token: string): Promise<FlowState> {
   const svc = runtime().service
-  const view = svc.view(token)
+  const view = await svc.view(token)
   const cursor = view.cursor
   const block = view.blocks.find((b) => b.blockId === cursor)
 
@@ -59,11 +59,11 @@ function stateOf(token: string): FlowState {
   let awaitingConfirm = false
 
   if (cursor !== null && block?.type === 'PAIRWISE') {
-    const config = configOf(token, cursor)
-    const record = runtime().service.store.byToken(token)!
+    const config = await configOf(token, cursor)
+    const record = await svc.record(token)
     pairCursor = (record.choices[cursor] ?? []).length
     pairTotal = progressOf(config, pairCursor).total
-    pair = svc.pair(token, cursor)
+    pair = await svc.pair(token, cursor)
     awaitingConfirm = pair === null
   }
 
@@ -85,7 +85,7 @@ function stateOf(token: string): FlowState {
 }
 
 export async function openSession(token: string): Promise<FlowState> {
-  runtime().service.open(token)
+  await runtime().service.open(token)
   return stateOf(token)
 }
 
@@ -94,22 +94,22 @@ export async function readState(token: string): Promise<FlowState> {
 }
 
 export async function answer(token: string, blockId: string, side: Side): Promise<FlowState> {
-  runtime().service.answer(token, blockId, side)
+  await runtime().service.answer(token, blockId, side)
   return stateOf(token)
 }
 
 export async function undo(token: string, blockId: string): Promise<FlowState> {
-  runtime().service.undo(token, blockId)
+  await runtime().service.undo(token, blockId)
   return stateOf(token)
 }
 
 export async function pick(token: string, blockId: string, index: number): Promise<FlowState> {
-  runtime().service.pick(token, blockId, index)
+  await runtime().service.pick(token, blockId, index)
   return stateOf(token)
 }
 
 export async function settleBlock(token: string, blockId: string): Promise<FlowState> {
-  runtime().service.settleBlock(token, blockId)
+  await runtime().service.settleBlock(token, blockId)
   return stateOf(token)
 }
 
@@ -117,7 +117,7 @@ export async function setScope(
   token: string,
   items: Record<string, boolean>,
 ): Promise<FlowState> {
-  runtime().service.setScope(token, items)
+  await runtime().service.setScope(token, items)
   return stateOf(token)
 }
 
@@ -128,8 +128,8 @@ export interface ConfirmView {
 
 /** C-03 — 전 축을 반영한 합성 미리보기와 수치 목록 */
 export async function confirmView(token: string, blockId: string): Promise<ConfirmView> {
-  const record = runtime().service.store.byToken(token)!
-  const config = configOf(token, blockId)
+  const record = await runtime().service.record(token)
+  const config = await configOf(token, blockId)
   if (config.kind !== 'PAIRWISE') throw new Error('BLOCK_NOT_PAIRWISE')
   const choices = (record.choices[blockId] ?? []) as Side[]
   return {
@@ -139,7 +139,7 @@ export async function confirmView(token: string, blockId: string): Promise<Confi
 }
 
 export async function settle(token: string): Promise<Spec> {
-  return runtime().service.settle(token).spec
+  return (await runtime().service.settle(token)).spec
 }
 
 export interface IssuedLink {
@@ -153,7 +153,7 @@ export async function issueLink(slug: string, clientLabel: string): Promise<Issu
   const rt = runtime()
   const profile = rt.profiles.find((p) => p.slug === slug)
   if (!profile) throw new Error('PROFILE_NOT_FOUND')
-  const r = rt.service.issue({ profile, clientLabel })
+  const r = await rt.service.issue({ proId: rt.proId, profile, clientLabel })
   return { no: r.no, clientUrl: r.clientUrl, shareText: r.shareText, token: r.token }
 }
 
@@ -173,22 +173,25 @@ export interface SessionRow {
 }
 
 export async function listSessions(): Promise<SessionRow[]> {
-  const svc = runtime().service
-  return svc.store.listByPro().map((r) => {
-    const v = svc.view(r.token)
-    return {
-      id: r.id,
-      no: r.no,
-      token: r.token,
-      profileSlug: r.profile.slug,
-      clientLabel: r.clientLabel,
-      state: r.state,
-      locked: v.locked,
-      total: v.total,
-      amountUsd: v.amountUsd,
-      weeks: v.weeks,
-    }
-  })
+  const rt = runtime()
+  const records = await rt.service.store.listByPro(rt.proId)
+  return Promise.all(
+    records.map(async (r) => {
+      const v = await rt.service.view(r.token)
+      return {
+        id: r.id,
+        no: r.no,
+        token: r.token,
+        profileSlug: r.profile.slug,
+        clientLabel: r.clientLabel,
+        state: r.state,
+        locked: v.locked,
+        total: v.total,
+        amountUsd: v.amountUsd,
+        weeks: v.weeks,
+      }
+    }),
+  )
 }
 
 export interface Deliverables {
@@ -202,7 +205,7 @@ export interface Deliverables {
 
 export async function deliverables(token: string, locale = 'ko'): Promise<Deliverables | null> {
   const rt = runtime()
-  const built = rt.service.specOf(token)
+  const built = await rt.service.specOf(token)
   if (built === null) return null
 
   const dict = rt.bundle[locale as keyof typeof rt.bundle] ?? rt.dict

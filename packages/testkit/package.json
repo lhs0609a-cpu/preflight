@@ -11,6 +11,7 @@
   "dependencies": {
     "@preflight/catalog": "workspace:*",
     "@preflight/core": "workspace:*",
+    "@preflight/db": "workspace:*",
     "@preflight/render": "workspace:*",
     "@preflight/session": "workspace:*",
     "@preflight/tokens": "workspace:*",
