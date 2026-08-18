@@ -14,18 +14,29 @@ import {
   evaluateGate,
   formatSessionNo,
   invariant,
+  judge,
   linesFromChoices,
   progressOf,
   serializedPairAt,
   specPayload,
   totalsOf,
   transition,
+  pendingCount,
+  respond as respondToProposal,
+  assertProposals,
+  toClientView,
   type AssetStates,
   type BlockConfig,
   type BlockOutput,
   type ChecklistSelection,
   type ClientBlockView,
   type CompiledProfile,
+  type NegotiationProposal,
+  type NegotiationResponse,
+  type NegotiationView,
+  type RequestSignals,
+  type SpecLine,
+  type Verdict,
   type SerializedPair,
   type Side,
   type Spec,
@@ -167,7 +178,10 @@ export class SessionService {
       assets: {},
       settled: [],
       submitted: [],
-      pendingNegotiations: 0,
+      negotiations: [],
+      axisOverrides: {},
+      revisionsUsed: 0,
+      pnrPassedAt: null,
       createdAt: now,
       openedAt: null,
       settledAt: null,
@@ -220,7 +234,7 @@ export class SessionService {
     const gate = evaluateGate(r.profile, {
       settled: new Set(r.settled),
       submitted: new Set(r.submitted),
-      pendingNegotiations: r.pendingNegotiations,
+      pendingNegotiations: pendingCount(r.negotiations),
     })
     const totals = totalsOf(r.profile, { scope: r.scope, assets: r.assets })
 
@@ -342,6 +356,81 @@ export class SessionService {
     return this.#viewOf(r)
   }
 
+  // ── 조율 (05 §8 · C-04) ──────────────────────────────────────────────
+
+  /**
+   * 프리랜서 역제안. 근거는 저장되지만 클라이언트에게 내려가지 않는다.
+   * 카드가 끝난 뒤 SLA 1일 안에 올린다 (04 §5.2).
+   */
+  async propose(token: string, items: readonly NegotiationProposal[]): Promise<number> {
+    const r = await this.#require(token)
+    assertProposals(items)
+    r.negotiations = items.map((n) => ({ ...n, response: null }))
+    await this.#store.put(r)
+    return pendingCount(r.negotiations)
+  }
+
+  /** 05 §8 — 비교 렌더링 값만. 근거 문장이 없다. */
+  async negotiations(token: string): Promise<NegotiationView[]> {
+    const r = await this.#require(token)
+    return toClientView(r.negotiations)
+  }
+
+  async respondNegotiation(
+    token: string,
+    id: string,
+    response: NegotiationResponse,
+  ): Promise<{ specLine: SpecLine; remaining: number }> {
+    const r = await this.#require(token)
+    const out = respondToProposal(r.negotiations, id, response)
+    r.axisOverrides[out.specLine.key] = out.specLine
+    await this.#store.put(r)
+    return out
+  }
+
+  // ── 피드백 (05 §10 · C-11) ───────────────────────────────────────────
+
+  /**
+   * 04 §4 — 판정은 아이콘 + 숫자로 내려간다. 문장이 없다.
+   * 자유 입력은 noteRaw 한 곳뿐이며 프리랜서 로케일로 번역해 전달한다.
+   */
+  async submitRequest(
+    token: string,
+    signals: RequestSignals,
+    opts: { readonly outOfScopeUsd?: number } = {},
+  ): Promise<Verdict> {
+    const r = await this.#require(token)
+    const totals = totalsOf(r.profile, { scope: r.scope, assets: r.assets })
+    const verdict = judge(
+      { ...signals, pnrPassed: r.pnrPassedAt !== null },
+      { used: r.revisionsUsed, total: totals.revisions },
+      {
+        // 재견적 기본값은 계약 금액에서 파생한다. 임의 상수를 두면
+        // 큰 계약과 작은 계약에서 같은 금액이 나온다.
+        requoteUsd: Math.round(totals.amountUsd * 0.25),
+        requoteDays: 2,
+        outOfScopeUsd: opts.outOfScopeUsd ?? Math.round(totals.amountUsd * 0.05),
+      },
+    )
+    if (verdict.outcome.kind === 'counted') {
+      r.revisionsUsed = verdict.outcome.revisionsAfter.used
+      await this.#store.put(r)
+    }
+    return verdict
+  }
+
+  /** 04 §3 — gated 는 리허설 통과 전 PNR 진입 불가 */
+  async passPnr(token: string): Promise<void> {
+    const r = await this.#require(token)
+    const gate = evaluateGate(r.profile, {
+      settled: new Set(r.settled),
+      submitted: new Set(r.submitted),
+    })
+    invariant(gate.pnrAllowed, 'PNR_BLOCKED', r.no)
+    r.pnrPassedAt = this.#clock.now()
+    await this.#store.put(r)
+  }
+
   // ── 확정 (05 §9) ─────────────────────────────────────────────────────
 
   async outputs(token: string): Promise<BlockOutput[]> {
@@ -363,10 +452,13 @@ export class SessionService {
     const gate = evaluateGate(r.profile, {
       settled: new Set(r.settled),
       submitted: new Set(r.submitted),
-      pendingNegotiations: r.pendingNegotiations,
+      pendingNegotiations: pendingCount(r.negotiations),
     })
+    // 05 §1 은 두 상황에 다른 코드를 준다. canSettle 에 미응답 역제안이
+    // 포함돼 있으므로, 먼저 보지 않으면 구체적인 이유가 일반 코드에 묻힌다.
+    const pending = pendingCount(r.negotiations)
+    invariant(pending === 0, 'NEGOTIATION_PENDING', String(pending))
     invariant(gate.canSettle, 'GATE_LOCKED', 'not all required blocks settled')
-    invariant(r.pendingNegotiations === 0, 'NEGOTIATION_PENDING', String(r.pendingNegotiations))
 
     r.settledAt = this.#clock.now()
     r.state = transition(r.state, 'SETTLED')
@@ -400,6 +492,11 @@ function lockedLineCount(r: SessionRecord): number {
   return n
 }
 
+function applyOverrides(r: SessionRecord, lines: SpecLine[]): SpecLine[] {
+  // 04 §5.3 — 조율 결과가 있으면 그 축은 owner 까지 함께 바뀐다
+  return lines.map((l) => r.axisOverrides[l.key] ?? l)
+}
+
 function outputsOf(r: SessionRecord): BlockOutput[] {
   const out: BlockOutput[] = []
   for (const block of r.profile.blocks) {
@@ -409,7 +506,7 @@ function outputsOf(r: SessionRecord): BlockOutput[] {
       if (choices === undefined || choices.length !== config.axes.length) continue
       out.push({
         blockId: block.id,
-        lines: linesFromChoices(config, choices),
+        lines: applyOverrides(r, linesFromChoices(config, choices)),
         lockedAt: r.settledAt,
         amountDeltaUsd: 0,
         daysDelta: 0,

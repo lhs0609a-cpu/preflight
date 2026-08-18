@@ -215,3 +215,52 @@ export async function deliverables(token: string, locale = 'ko'): Promise<Delive
     offer: renderOfferText(built.spec),
   }
 }
+
+// ── 온보딩 (P-01) ───────────────────────────────────────────────────────
+
+export interface ProView {
+  readonly id: string
+  readonly email: string
+  readonly displayName: string
+  readonly locale: string
+  readonly timezone: string
+  readonly billingVerified: boolean
+}
+
+export async function signup(input: {
+  email: string
+  displayName: string
+  locale: string
+  timezone: string
+}): Promise<ProView> {
+  const pro = await runtime().proService.signup(input)
+  return view(pro)
+}
+
+/** NFR-5.4 — 카드 번호가 아니라 PG 빌링키만 받는다. */
+export async function registerBilling(
+  proId: string,
+  provider: string,
+  billingKey: string,
+): Promise<ProView> {
+  const pro = await runtime().proService.registerBilling(proId, { provider, billingKey })
+  return view(pro)
+}
+
+function view(p: {
+  id: string
+  email: string
+  displayName: string
+  locale: string
+  timezone: string
+  billingVerified: boolean
+}): ProView {
+  return {
+    id: p.id,
+    email: p.email,
+    displayName: p.displayName,
+    locale: p.locale,
+    timezone: p.timezone,
+    billingVerified: p.billingVerified,
+  }
+}

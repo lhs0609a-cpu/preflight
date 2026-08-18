@@ -7,7 +7,12 @@
  * 개발 서버의 HMR 이 모듈을 다시 평가해도 세션이 날아가지 않도록
  * globalThis 에 매단다.
  */
-import { InMemoryProStore, InMemorySessionStore, SessionService } from '@preflight/session'
+import {
+  InMemoryProStore,
+  InMemorySessionStore,
+  ProService,
+  SessionService,
+} from '@preflight/session'
 import { compileAllProfiles, loadLabelBundle } from '@preflight/catalog'
 import { registerM0Renderers } from '@preflight/render'
 import type { CompiledProfile } from '@preflight/core'
@@ -19,6 +24,7 @@ export const DEMO_PRO_ID = 'pro-demo'
 
 interface Runtime {
   readonly service: SessionService
+  readonly proService: ProService
   readonly proId: string
   readonly profiles: readonly CompiledProfile[]
   /** 클라이언트 화면이 쓰는 사전. 06 대로 영문 고정이다 — 클라이언트는 로케일이 없다 */
@@ -58,6 +64,7 @@ function build(): Runtime {
   const bundle = loadLabelBundle()
   return {
     service,
+    proService: new ProService(service.pros, () => randomHex(8)),
     proId: DEMO_PRO_ID,
     profiles: compileAllProfiles(),
     dict: bundle.en,

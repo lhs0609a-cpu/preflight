@@ -53,7 +53,12 @@ CREATE TABLE IF NOT EXISTS session (
   -- 확정 전 중간 상태 (03 문서 확장)
   scope            JSONB NOT NULL DEFAULT '{}'::jsonb,
   assets           JSONB NOT NULL DEFAULT '{}'::jsonb,
-  pending_negotiations INT NOT NULL DEFAULT 0,
+  -- 04 §5 — 근거(reason)는 여기 남고 클라이언트에게는 절대 내려가지 않는다
+  negotiations     JSONB NOT NULL DEFAULT '[]'::jsonb,
+  -- 04 §5.3 — 조율로 확정된 축. owner 가 책임 귀속 기록이다
+  axis_overrides   JSONB NOT NULL DEFAULT '{}'::jsonb,
+  revisions_used   INT NOT NULL DEFAULT 0,
+  pnr_passed_at    TIMESTAMPTZ,
 
   opened_at        TIMESTAMPTZ,
   settled_at       TIMESTAMPTZ,

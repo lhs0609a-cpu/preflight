@@ -19,10 +19,14 @@ import {
   type CompiledProfile,
   type Side,
 } from '@preflight/core'
+import { judge, type NegotiationView } from '@preflight/core'
 import { registerM0Renderers, renderCard } from '@preflight/render'
 import {
+  AssetCheck,
   Done,
+  Feedback,
   LinkEntry,
+  NegotiationCompare,
   ScopeAssemble,
   SpecConfirm,
   StructurePick,
@@ -108,6 +112,65 @@ function screensFor(profile: CompiledProfile): Screen[] {
       html(
         `${profile.slug}/C-05`,
         <StructurePick config={structure.config} dict={dict} selected={1} />,
+      ),
+    )
+  }
+
+  // C-04 — 역제안 비교. 근거 문장이 내려가지 않는지 여기서도 본다
+  if (taste && taste.config.kind === 'PAIRWISE') {
+    const config = taste.config
+    const axis = config.axes[0]!
+    const view: NegotiationView = {
+      id: 'n1',
+      axisKey: axis.nameKey,
+      current: { labelKey: axis.a.labelKey, measure: axis.a.measure, value: axis.a.value },
+      proposed: { labelKey: axis.b.labelKey, measure: axis.b.measure, value: axis.b.value },
+      response: null,
+    }
+    out.push(
+      html(
+        `${profile.slug}/C-04`,
+        <NegotiationCompare
+          item={view}
+          index={0}
+          total={2}
+          currentPreview={renderCard(config.renderer, { ...config.base, [axis.field]: axis.a.value }, { w: 150, h: 170 })}
+          proposedPreview={renderCard(config.renderer, { ...config.base, [axis.field]: axis.b.value }, { w: 150, h: 170 })}
+        />,
+      ),
+    )
+
+    // C-11 — 피드백. 판정 결과 3종을 전부 렌더한다
+    const axisKeys = config.axes.map((a) => a.nameKey)
+    const cases = [
+      { basis: 'off' as const },
+      { basis: 'taste' as const },
+      { basis: 'change' as const },
+    ]
+    for (const c of cases) {
+      const verdict = judge(c, { used: 1, total: 3 }, { requoteUsd: 120, requoteDays: 2, outOfScopeUsd: 18 })
+      out.push(
+        html(
+          `${profile.slug}/C-11[${c.basis}]`,
+          <Feedback axisKeys={axisKeys} dict={dict} basis={c.basis} verdict={verdict} />,
+        ),
+      )
+    }
+  }
+
+  // C-08 — 자료 체크
+  const assets = blockWith(profile, 'CHECKLIST', 'assets')
+  if (assets && assets.config.kind === 'CHECKLIST') {
+    out.push(
+      html(
+        `${profile.slug}/C-08`,
+        <AssetCheck
+          config={assets.config}
+          dict={dict}
+          provided={1}
+          total={assets.config.items.length}
+          delayedDays={3}
+        />,
       ),
     )
   }

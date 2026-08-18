@@ -4,7 +4,13 @@
  * 인메모리 구현과 **같은 계약 테스트**를 통과한다. 그것이 없으면
  * "저장소만 갈아끼우면 된다"는 말은 검증되지 않은 주장이다.
  */
-import type { AssetStates, CompiledProfile, Side } from '@preflight/core'
+import type {
+  AssetStates,
+  CompiledProfile,
+  NegotiationProposal,
+  Side,
+  SpecLine,
+} from '@preflight/core'
 import type { Pro, ProStore, SessionRecord, SessionStore } from '@preflight/session'
 import type { Sql } from './sql.ts'
 
@@ -83,7 +89,10 @@ interface SessionRow {
   state: string
   scope: Record<string, boolean> | string
   assets: AssetStates | string
-  pending_negotiations: number
+  negotiations: NegotiationProposal[] | string
+  axis_overrides: Record<string, SpecLine> | string
+  revisions_used: number
+  pnr_passed_at: Date | string | null
   opened_at: Date | string | null
   settled_at: Date | string | null
   created_at: Date | string
@@ -108,13 +117,17 @@ export class PgSessionStore implements SessionStore {
     await this.sql.query(
       `INSERT INTO session (
          id, no, pro_id, profile_slug, profile_snapshot, client_label, marketplace,
-         state, scope, assets, pending_negotiations, opened_at, settled_at, created_at
-       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+         state, scope, assets, negotiations, axis_overrides, revisions_used,
+         pnr_passed_at, opened_at, settled_at, created_at
+       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
        ON CONFLICT (id) DO UPDATE SET
          state = EXCLUDED.state,
          scope = EXCLUDED.scope,
          assets = EXCLUDED.assets,
-         pending_negotiations = EXCLUDED.pending_negotiations,
+         negotiations = EXCLUDED.negotiations,
+         axis_overrides = EXCLUDED.axis_overrides,
+         revisions_used = EXCLUDED.revisions_used,
+         pnr_passed_at = EXCLUDED.pnr_passed_at,
          opened_at = EXCLUDED.opened_at,
          settled_at = EXCLUDED.settled_at`,
       [
@@ -128,7 +141,10 @@ export class PgSessionStore implements SessionStore {
         r.state,
         JSON.stringify(r.scope),
         JSON.stringify(r.assets),
-        r.pendingNegotiations,
+        JSON.stringify(r.negotiations),
+        JSON.stringify(r.axisOverrides),
+        r.revisionsUsed,
+        r.pnrPassedAt,
         r.openedAt,
         r.settledAt,
         r.createdAt,
@@ -205,7 +221,10 @@ export class PgSessionStore implements SessionStore {
       assets: json<AssetStates>(row.assets),
       settled,
       submitted,
-      pendingNegotiations: row.pending_negotiations,
+      negotiations: json<NegotiationProposal[]>(row.negotiations),
+      axisOverrides: json<Record<string, SpecLine>>(row.axis_overrides),
+      revisionsUsed: row.revisions_used,
+      pnrPassedAt: iso(row.pnr_passed_at),
       createdAt: iso(row.created_at)!,
       openedAt: iso(row.opened_at),
       settledAt: iso(row.settled_at),

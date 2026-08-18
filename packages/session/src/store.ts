@@ -7,7 +7,15 @@
  * 03 문서 스키마로 가는 구현은 @preflight/db 에 있고, 두 구현은 같은 계약
  * 테스트를 통과한다. 그것이 "갈아끼우기가 싸다"를 주장이 아니라 사실로 만든다.
  */
-import type { AssetStates, ChecklistSelection, CompiledProfile, SessionState, Side } from '@preflight/core'
+import type {
+  AssetStates,
+  ChecklistSelection,
+  CompiledProfile,
+  NegotiationProposal,
+  SessionState,
+  Side,
+  SpecLine,
+} from '@preflight/core'
 
 /** 03 §2.1 */
 export interface Pro {
@@ -41,7 +49,14 @@ export interface SessionRecord {
   assets: AssetStates
   settled: string[]
   submitted: string[]
-  pendingNegotiations: number
+  /** 04 §5 — 근거는 여기 남고 클라이언트에게는 내려가지 않는다 */
+  negotiations: NegotiationProposal[]
+  /** 조율 결과로 확정된 축. owner 가 책임 귀속 기록이다 (04 §5.3) */
+  axisOverrides: Record<string, SpecLine>
+  /** 04 §4 — 차감된 수정 횟수 */
+  revisionsUsed: number
+  /** 04 §3 — 되돌림 한계점 통과 시각 */
+  pnrPassedAt: string | null
   readonly createdAt: string
   openedAt: string | null
   settledAt: string | null
@@ -49,9 +64,16 @@ export interface SessionRecord {
   readonly marketplace: string | null
 }
 
+/** FR-12 — 알림 설정. quietHours 는 프리랜서 타임존 기준이다 (05 §12) */
+export interface NotifyPrefs {
+  readonly channels: readonly string[]
+  readonly quietHours?: { readonly from: string; readonly to: string; readonly mode: 'digest' | 'silent' }
+}
+
 export interface ProStore {
   put(pro: Pro): Promise<void>
   byId(id: string): Promise<Pro | undefined>
+  byEmail?(email: string): Promise<Pro | undefined>
 }
 
 export interface SessionStore {
@@ -72,6 +94,10 @@ export class InMemoryProStore implements ProStore {
 
   async byId(id: string): Promise<Pro | undefined> {
     return this.#byId.get(id)
+  }
+
+  async byEmail(email: string): Promise<Pro | undefined> {
+    return [...this.#byId.values()].find((p) => p.email === email)
   }
 }
 
