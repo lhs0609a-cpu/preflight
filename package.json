@@ -15,7 +15,10 @@
     "test": "vitest run",
     "check:wordless": "tsx tools/ci/check-wordless.ts",
     "check:data-only": "node tools/ci/check-data-only.mjs",
-    "gate": "pnpm lint && pnpm typecheck && pnpm schema:check && pnpm labels:check && pnpm profiles:check && pnpm test && pnpm check:wordless"
+    "gate": "pnpm lint && pnpm typecheck && pnpm schema:check && pnpm labels:check && pnpm profiles:check && pnpm test && pnpm check:wordless",
+    "dev": "pnpm --filter @preflight/web dev",
+    "build": "pnpm --filter @preflight/web build",
+    "start": "pnpm --filter @preflight/web start"
   },
   "devDependencies": {
     "@preflight/core": "workspace:*",
@@ -39,6 +42,7 @@
     "vitest": "^2.1.8"
   },
   "dependencies": {
+    "next": "^16.3.1",
     "zod": "^3.24.1",
     "zod-to-json-schema": "^3.24.1"
   },

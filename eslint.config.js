@@ -101,7 +101,15 @@ const preflight = {
 }
 
 export default tseslint.config(
-  { ignores: ['**/node_modules/**', '**/dist/**', 'packages/profiles/*.json'] },
+  {
+    ignores: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/.next/**',
+      '**/next-env.d.ts',
+      'packages/profiles/**/*.json',
+    ],
+  },
   ...tseslint.configs.recommended,
   {
     plugins: { preflight },

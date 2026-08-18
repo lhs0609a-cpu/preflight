@@ -1,12 +1,12 @@
 {
-  "name": "@preflight/testkit",
+  "name": "@preflight/web",
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "main": "./src/index.ts",
-  "exports": {
-    ".": "./src/index.ts",
-    "./*": "./src/*"
+  "scripts": {
+    "dev": "next dev --port 3100",
+    "build": "next build",
+    "start": "next start --port 3100"
   },
   "dependencies": {
     "@preflight/catalog": "workspace:*",
@@ -14,6 +14,9 @@
     "@preflight/render": "workspace:*",
     "@preflight/session": "workspace:*",
     "@preflight/tokens": "workspace:*",
-    "@preflight/ui": "workspace:*"
+    "@preflight/ui": "workspace:*",
+    "next": "^15.6.1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
   }
 }

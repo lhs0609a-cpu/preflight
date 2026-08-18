@@ -25,6 +25,7 @@
       "@preflight/tokens": ["packages/tokens/src/index.ts"],
       "@preflight/testkit": ["packages/testkit/src/index.ts"],
       "@preflight/testkit/*": ["packages/testkit/src/*"],
+      "@preflight/catalog": ["packages/catalog/src/index.ts"],
       "@preflight/session": ["packages/session/src/index.ts"],
       "@preflight/session/*": ["packages/session/src/*"],
       "@preflight/ui": ["packages/ui/src/index.ts"],

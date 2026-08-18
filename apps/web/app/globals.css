@@ -1,0 +1,955 @@
+/*
+ * Preflight 디자인 시스템 — 06 §5.
+ *
+ * 껍데기는 정교하게, 카드 내용물은 저충실도로.
+ * 설계 헌법 3 — 예쁘면 판단할 축이 가려진다. 그래서 여백·타이포·모션·포커스는
+ * 끝까지 다듬되, 카드 안쪽은 회색 바와 기하 도형으로 남긴다.
+ */
+
+/* ── 토큰 ─────────────────────────────────────────────────────────────── */
+
+:root {
+  /* 06 §5.2 — 색은 의미만 갖는다 */
+  --lock: #2c5f7c;
+  --agree: #17694f;
+  --cost: #8a6410;
+  --stop: #9b3b2e;
+  --ink: #16181c;
+
+  --paper: #ffffff;
+  --surface: #fbfbfc;
+  --mute: #d9dde1;
+  --hair: #e8ebee;
+  --ink-2: #5b636d;
+  --ink-3: #8b949e;
+
+  /* 8pt 스케일 */
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 16px;
+  --s5: 24px;
+  --s6: 32px;
+  --s7: 48px;
+  --s8: 64px;
+
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 18px;
+  --r-full: 999px;
+
+  /* 06 §5.5 */
+  --dur: 140ms;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+
+  --shadow-1: 0 1px 2px rgb(22 24 28 / 0.05), 0 1px 1px rgb(22 24 28 / 0.04);
+  --shadow-2: 0 4px 16px rgb(22 24 28 / 0.08), 0 1px 3px rgb(22 24 28 / 0.06);
+  --shadow-3: 0 12px 32px rgb(22 24 28 / 0.12), 0 2px 8px rgb(22 24 28 / 0.06);
+
+  /* 06 §5.1 — 수치가 이 제품의 주어다 */
+  --font-ui: 'Pretendard Variable', Pretendard, Inter, 'Noto Sans', 'Noto Sans KR',
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-num: 'IBM Plex Mono', 'SFMono-Regular', ui-monospace, 'Cascadia Mono', Menlo, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #eef1f4;
+    --ink-2: #a8b1bb;
+    --ink-3: #6f7883;
+    --paper: #16181c;
+    --surface: #1b1e23;
+    --mute: #2e3339;
+    --hair: #272c32;
+    --lock: #5fa3c9;
+    --agree: #4bb08c;
+    --cost: #d5a638;
+    --stop: #d9705f;
+    --shadow-1: 0 1px 2px rgb(0 0 0 / 0.4);
+    --shadow-2: 0 4px 16px rgb(0 0 0 / 0.45);
+    --shadow-3: 0 12px 32px rgb(0 0 0 / 0.55);
+  }
+}
+
+/* ── 리셋 ─────────────────────────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100dvh;
+  font-family: var(--font-ui);
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink);
+  background: var(--surface);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:disabled {
+  cursor: default;
+  opacity: 0.35;
+}
+
+ol,
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+/* NFR-4.2 — 포커스는 반드시 보인다. 마우스 클릭에는 뜨지 않는다. */
+:focus-visible {
+  outline: 2px solid var(--lock);
+  outline-offset: 3px;
+  border-radius: var(--r-sm);
+}
+
+/* ── 무언어 프리미티브 ───────────────────────────────────────────────── */
+
+.pf-num {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  font-size: 1.0625em;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.pf-measure {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.9375em;
+  color: var(--ink);
+}
+
+.pf-label {
+  font-size: 0.9375em;
+  color: var(--ink-2);
+  letter-spacing: 0.01em;
+}
+
+.pf-figure,
+.pf-icon,
+.pf-gauge {
+  display: inline-flex;
+  line-height: 0;
+}
+
+.pf-icon svg [data-icon] {
+  stroke: currentColor;
+}
+
+.pf-icon {
+  color: var(--ink-2);
+}
+
+.pf-iconbtn {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 48px;
+  block-size: 48px;
+  border-radius: var(--r-full);
+  color: var(--ink);
+  background: var(--paper);
+  box-shadow: var(--shadow-1);
+  border: 1px solid var(--hair);
+  transition:
+    transform var(--dur) var(--ease),
+    box-shadow var(--dur) var(--ease),
+    background var(--dur) var(--ease);
+}
+
+.pf-iconbtn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-2);
+}
+
+.pf-iconbtn:active:not(:disabled) {
+  transform: translateY(0) scale(0.97);
+}
+
+/* ── 셸 ───────────────────────────────────────────────────────────────── */
+
+.pf-shell {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  max-inline-size: 460px;
+  margin-inline: auto;
+  padding: max(var(--s4), env(safe-area-inset-top)) var(--s4)
+    max(var(--s5), env(safe-area-inset-bottom));
+  background: var(--paper);
+}
+
+@media (min-width: 600px) {
+  .pf-shell {
+    margin-block: var(--s7);
+    min-height: auto;
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-3);
+    border: 1px solid var(--hair);
+  }
+}
+
+.pf-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s5);
+  padding-block: var(--s5);
+  animation: pf-enter var(--dur) var(--ease) both;
+}
+
+@keyframes pf-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+/* ── C-01 진입 ────────────────────────────────────────────────────────── */
+
+.pf-avatar {
+  inline-size: 72px;
+  block-size: 72px;
+  border-radius: var(--r-full);
+  object-fit: cover;
+  border: 1px solid var(--hair);
+}
+
+.pf-duration {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s2);
+  font-size: 1.5rem;
+}
+
+.pf-duration .pf-num {
+  font-size: 1.75rem;
+}
+
+.pf-steps {
+  display: flex;
+  gap: var(--s2);
+  align-items: center;
+}
+
+/* ── C-02 카드 ────────────────────────────────────────────────────────── */
+
+.pf-progress {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  inline-size: 100%;
+  justify-content: space-between;
+}
+
+.pf-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s3);
+  inline-size: 100%;
+}
+
+.pf-card {
+  border-radius: var(--r-md);
+  overflow: hidden;
+  border: 1px solid var(--hair);
+  background: var(--paper);
+  box-shadow: var(--shadow-1);
+  transition:
+    transform var(--dur) var(--ease),
+    box-shadow var(--dur) var(--ease),
+    border-color var(--dur) var(--ease);
+}
+
+.pf-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-2);
+  border-color: var(--mute);
+}
+
+.pf-card:active {
+  transform: translateY(-1px) scale(0.99);
+}
+
+.pf-card svg {
+  inline-size: 100%;
+  block-size: auto;
+}
+
+/* ── C-03 / C-10 사양 ─────────────────────────────────────────────────── */
+
+.pf-spec {
+  inline-size: 100%;
+  display: flex;
+  flex-direction: column;
+  border-block: 1px solid var(--hair);
+}
+
+.pf-spec-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s4);
+  padding-block: var(--s3);
+}
+
+.pf-spec-row + .pf-spec-row {
+  border-block-start: 1px solid var(--hair);
+}
+
+.pf-spec-row dd {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s2);
+  margin: 0;
+}
+
+.pf-warn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s2);
+  padding: var(--s2) var(--s4);
+  border-radius: var(--r-full);
+  background: color-mix(in srgb, var(--cost) 10%, transparent);
+  color: var(--cost);
+}
+
+.pf-warn .pf-icon {
+  color: var(--cost);
+}
+
+.pf-actions {
+  display: flex;
+  gap: var(--s4);
+}
+
+/* ── C-05 구조 ────────────────────────────────────────────────────────── */
+
+.pf-picks {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s2);
+  inline-size: 100%;
+}
+
+.pf-pick {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s2);
+  padding: var(--s2);
+  border-radius: var(--r-md);
+  border: 1px solid var(--hair);
+  background: var(--paper);
+  transition:
+    border-color var(--dur) var(--ease),
+    box-shadow var(--dur) var(--ease),
+    transform var(--dur) var(--ease);
+}
+
+.pf-pick:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-2);
+}
+
+.pf-pick[aria-checked='true'] {
+  border-color: var(--lock);
+  box-shadow: 0 0 0 1px var(--lock);
+}
+
+.pf-pick svg {
+  inline-size: 100%;
+  block-size: auto;
+  border-radius: var(--r-sm);
+}
+
+.pf-pick-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.8125rem;
+}
+
+/* ── C-07 범위 ────────────────────────────────────────────────────────── */
+
+.pf-scope {
+  inline-size: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.pf-scope li + li {
+  border-block-start: 1px solid var(--hair);
+}
+
+.pf-scope-row {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  align-items: center;
+  gap: var(--s3);
+  padding-block: var(--s3);
+  min-block-size: 48px;
+  cursor: pointer;
+}
+
+.pf-scope-row input {
+  inline-size: 20px;
+  block-size: 20px;
+  accent-color: var(--lock);
+  cursor: pointer;
+}
+
+.pf-scope-row:has(input:checked) .pf-label {
+  color: var(--ink);
+}
+
+.pf-totals {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  inline-size: 100%;
+  justify-content: flex-end;
+  padding-block-start: var(--s3);
+  border-block-start: 2px solid var(--ink);
+}
+
+.pf-totals .pf-num {
+  font-size: 1.25rem;
+}
+
+/* ── C-10 ─────────────────────────────────────────────────────────────── */
+
+.pf-no {
+  font-family: var(--font-num);
+  font-size: 0.875rem;
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
+}
+
+/* ── 하단 액션 바 ─────────────────────────────────────────────────────── */
+
+.pf-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s4);
+  padding-block-start: var(--s4);
+  border-block-start: 1px solid var(--hair);
+}
+
+.pf-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s2);
+  min-block-size: 48px;
+  padding-inline: var(--s5);
+  border-radius: var(--r-full);
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 600;
+  transition:
+    transform var(--dur) var(--ease),
+    opacity var(--dur) var(--ease);
+}
+
+.pf-primary .pf-icon {
+  color: var(--paper);
+}
+
+.pf-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.pf-primary:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+/* ── 접근성·성능 ─────────────────────────────────────────────────────── */
+
+/* NFR-4.3 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* 06 §5.5 — 저사양 기기 모드. 신흥국 사용자 다수 */
+[data-motion='off'] *,
+[data-motion='off'] *::before,
+[data-motion='off'] *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+.pf-sr {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ── L-00 랜딩 (프리랜서 대상 · 문장 허용) ───────────────────────────── */
+
+.lp {
+  max-inline-size: 960px;
+  margin-inline: auto;
+  padding: var(--s6) var(--s4) var(--s8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s8);
+}
+
+.lp-eyebrow {
+  font-family: var(--font-num);
+  font-size: 0.8125rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.lp-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s4);
+  text-align: center;
+}
+
+.lp-hero h1 {
+  font-size: clamp(2rem, 6vw, 3.25rem);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  font-weight: 700;
+  text-wrap: balance;
+}
+
+.lp-sub {
+  max-inline-size: 34ch;
+  color: var(--ink-2);
+  font-size: 1.0625rem;
+  text-wrap: balance;
+}
+
+.lp-hint {
+  font-size: 0.875rem;
+  color: var(--ink-3);
+}
+
+.lp-demo {
+  inline-size: min(100%, 380px);
+  padding: var(--s4);
+  border-radius: var(--r-lg);
+  border: 1px solid var(--hair);
+  background: var(--paper);
+  box-shadow: var(--shadow-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+}
+
+.lp-demo .pf-screen {
+  padding-block: 0;
+  gap: var(--s3);
+}
+
+.lp-demo-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.lp-demo-done {
+  align-items: center;
+}
+
+.lp-again {
+  align-self: center;
+  padding: var(--s2) var(--s5);
+  border-radius: var(--r-full);
+  border: 1px solid var(--hair);
+  font-size: 0.875rem;
+  transition: background var(--dur) var(--ease);
+}
+
+.lp-again:hover {
+  background: var(--surface);
+}
+
+.lp-band {
+  padding: var(--s6) var(--s4);
+  border-radius: var(--r-lg);
+  background: var(--paper);
+  border: 1px solid var(--hair);
+}
+
+.lp-compare {
+  display: grid;
+  gap: var(--s6);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 720px) {
+  .lp-compare {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.lp-k {
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-block-end: var(--s2);
+}
+
+.lp-quote {
+  font-size: 1.375rem;
+  color: var(--ink-2);
+  margin-block-end: var(--s5);
+}
+
+.lp-zero {
+  font-family: var(--font-num);
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--stop);
+  line-height: 1;
+}
+
+.lp-spec {
+  display: flex;
+  flex-direction: column;
+  inline-size: 100%;
+}
+
+.lp-spec li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s4);
+  padding-block: var(--s2);
+  border-block-start: 1px solid var(--hair);
+  font-size: 0.9375rem;
+}
+
+.lp-spec li span {
+  color: var(--ink-2);
+}
+
+.lp-spec li b {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.lp-types h2,
+.lp-foot p {
+  font-size: 1.25rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  margin-block-end: var(--s4);
+}
+
+.lp-types ul {
+  display: grid;
+  gap: var(--s2);
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+}
+
+.lp-types li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--s3) var(--s4);
+  border-radius: var(--r-md);
+  border: 1px solid var(--hair);
+  background: var(--paper);
+}
+
+.lp-types li span {
+  font-family: var(--font-num);
+  font-size: 0.75rem;
+  color: var(--ink-3);
+}
+
+.lp-foot {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s3);
+}
+
+.lp-cta {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 48px;
+  padding-inline: var(--s6);
+  border-radius: var(--r-full);
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform var(--dur) var(--ease);
+}
+
+.lp-cta:hover {
+  transform: translateY(-1px);
+}
+
+/* ── 프리랜서 콘솔 ───────────────────────────────────────────────────── */
+
+.pro {
+  max-inline-size: 780px;
+  margin-inline: auto;
+  padding: var(--s6) var(--s4) var(--s8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s5);
+}
+
+.pro-head h1 {
+  font-size: 1.5rem;
+  letter-spacing: -0.02em;
+}
+
+.pro-head p {
+  color: var(--ink-3);
+  font-size: 0.9375rem;
+}
+
+.pro-card {
+  padding: var(--s5);
+  border-radius: var(--r-lg);
+  border: 1px solid var(--hair);
+  background: var(--paper);
+  box-shadow: var(--shadow-1);
+}
+
+.pro-card h2 {
+  font-size: 1rem;
+  font-weight: 650;
+  margin-block-end: var(--s4);
+}
+
+.pro-form {
+  display: grid;
+  gap: var(--s3);
+  grid-template-columns: 1fr;
+  align-items: end;
+}
+
+@media (min-width: 640px) {
+  .pro-form {
+    grid-template-columns: 1fr 1fr auto;
+  }
+}
+
+.pro-form label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s1);
+  font-size: 0.8125rem;
+  color: var(--ink-2);
+}
+
+.pro-form select,
+.pro-form input {
+  min-block-size: 44px;
+  padding-inline: var(--s3);
+  border-radius: var(--r-sm);
+  border: 1px solid var(--mute);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+}
+
+.pro-btn {
+  min-block-size: 44px;
+  padding-inline: var(--s5);
+  border-radius: var(--r-sm);
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 600;
+  transition: transform var(--dur) var(--ease);
+}
+
+.pro-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.pro-issued,
+.pro-detail {
+  margin-block-start: var(--s4);
+  padding-block-start: var(--s4);
+  border-block-start: 1px solid var(--hair);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+}
+
+.pro-no {
+  font-family: var(--font-num);
+  letter-spacing: 0.08em;
+  color: var(--lock);
+  font-weight: 600;
+}
+
+.pro-note {
+  font-size: 0.8125rem;
+  color: var(--ink-3);
+  line-height: 1.55;
+}
+
+.pro-open {
+  font-size: 0.875rem;
+  color: var(--lock);
+  align-self: flex-start;
+}
+
+.pro-copy {
+  border: 1px solid var(--hair);
+  border-radius: var(--r-sm);
+  overflow: hidden;
+}
+
+.pro-copy-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--s2) var(--s3);
+  background: var(--surface);
+  font-size: 0.75rem;
+  color: var(--ink-2);
+  letter-spacing: 0.04em;
+}
+
+.pro-copy-head button {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--lock);
+  padding: var(--s1) var(--s2);
+  border-radius: var(--r-sm);
+  transition: background var(--dur) var(--ease);
+}
+
+.pro-copy-head button:hover {
+  background: color-mix(in srgb, var(--lock) 12%, transparent);
+}
+
+.pro-pre,
+.pro-inline {
+  display: block;
+  padding: var(--s3);
+  font-family: var(--font-num);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-all;
+  color: var(--ink);
+}
+
+.pro-pre-mono {
+  font-variant-numeric: tabular-nums;
+  white-space: pre;
+  overflow-x: auto;
+  word-break: normal;
+}
+
+.pro-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.pro-list li + li {
+  border-block-start: 1px solid var(--hair);
+}
+
+.pro-row {
+  inline-size: 100%;
+  display: grid;
+  grid-template-columns: auto 1fr auto auto auto;
+  gap: var(--s3);
+  align-items: center;
+  padding-block: var(--s3);
+  text-align: start;
+  transition: opacity var(--dur) var(--ease);
+}
+
+.pro-row:hover {
+  opacity: 0.7;
+}
+
+.pro-row-no {
+  font-family: var(--font-num);
+  font-size: 0.8125rem;
+  color: var(--ink-3);
+}
+
+.pro-row-label {
+  font-weight: 550;
+}
+
+.pro-row-state {
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  padding: 2px var(--s2);
+  border-radius: var(--r-full);
+  background: var(--surface);
+  color: var(--ink-2);
+  border: 1px solid var(--hair);
+}
+
+.pro-row-state[data-state='SETTLED'] {
+  color: var(--agree);
+  border-color: color-mix(in srgb, var(--agree) 40%, transparent);
+}
+
+.pro-row-prog,
+.pro-row-amt {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.875rem;
+}
+
+.pro-empty {
+  color: var(--ink-3);
+  font-size: 0.9375rem;
+}

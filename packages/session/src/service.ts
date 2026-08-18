@@ -371,6 +371,32 @@ export class SessionService {
     return out
   }
 
+  #buildSpec(token: string, r: SessionRecord): { spec: Spec; payload: string } {
+    const totals = totalsOf(r.profile, { scope: r.scope, assets: r.assets })
+    const spec = compileSpec(r.profile, {
+      no: r.no,
+      outputs: this.outputs(token),
+      amountUsd: totals.amountUsd,
+      weeks: totals.weeks,
+      revisions: totals.revisions,
+      lockedAt: r.settledAt ?? this.#clock.now(),
+    })
+    return { spec, payload: specPayload(spec) }
+  }
+
+  /**
+   * 이미 확정된 세션의 사양서를 다시 만든다.
+   *
+   * settle() 을 두 번 부를 수는 없다 — 상태를 옮기기 때문이다.
+   * 사양서는 확정 시점 입력으로부터 결정적으로 재생성되므로
+   * 해시가 처음과 같다. 그것이 이 함수가 안전한 이유다.
+   */
+  specOf(token: string): { spec: Spec; payload: string } | null {
+    const r = this.#require(token)
+    if (r.settledAt === null) return null
+    return this.#buildSpec(token, r)
+  }
+
   settle(token: string): { spec: Spec; payload: string } {
     const r = this.#require(token)
     const gate = evaluateGate(r.profile, {
@@ -383,16 +409,6 @@ export class SessionService {
 
     r.settledAt = this.#clock.now()
     r.state = transition(r.state, 'SETTLED')
-
-    const totals = totalsOf(r.profile, { scope: r.scope, assets: r.assets })
-    const spec = compileSpec(r.profile, {
-      no: r.no,
-      outputs: this.outputs(token),
-      amountUsd: totals.amountUsd,
-      weeks: totals.weeks,
-      revisions: totals.revisions,
-      lockedAt: r.settledAt,
-    })
-    return { spec, payload: specPayload(spec) }
+    return this.#buildSpec(token, r)
   }
 }
