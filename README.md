@@ -4,7 +4,15 @@
 
 프리랜스 마켓플레이스에서 언어 없이 사양을 확정하는 레이어.
 
-기획·설계 문서는 상위 폴더(`../`)의 `00`~`12` 를 본다. 이 저장소는 그 구현이다.
+기획·설계 문서는 `00`~`13` 을 본다. 이 저장소는 그 구현이다.
+
+| | |
+|---|---|
+| 라이브 | https://preflight-five-beta.vercel.app |
+| 클라이언트 화면 | `/s/{token}` — 가입 없이 링크만 |
+| 프리랜서 콘솔 | [/pro](https://preflight-five-beta.vercel.app/pro) · [/pro/signup](https://preflight-five-beta.vercel.app/pro/signup) |
+
+main 에 푸시하면 Vercel 이 자동으로 배포한다.
 
 ---
 
