@@ -8,6 +8,7 @@
 import { invariant } from '../invariant.ts'
 import { makePair, serializePair, type Pair, type SerializedPair, type Side } from '../block/pair.ts'
 import type { Axis, BlockConfig, SpecLine } from '../block/types.ts'
+import type { JsonValue } from '../json.ts'
 
 export interface PairwiseState {
   readonly cursor: number
@@ -66,9 +67,9 @@ export function linesFromChoices(config: BlockConfig, choices: readonly Side[]):
 export function composedValues(
   config: BlockConfig,
   choices: readonly Side[],
-): Readonly<Record<string, unknown>> {
+): Readonly<Record<string, JsonValue>> {
   const c = pairwiseOf(config)
-  const out: Record<string, unknown> = { ...c.base }
+  const out: Record<string, JsonValue> = { ...c.base }
   c.axes.forEach((axis, i) => {
     const side = choices[i]
     if (side !== undefined) out[axis.field] = axis[side].value

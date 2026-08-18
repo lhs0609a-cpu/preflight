@@ -1,6 +1,6 @@
 export * from './wordless.ts'
 export * from './profiles.ts'
-export { CLIENT_SCREENS } from './fixtures/screens.ts'
+export { CLIENT_SCREENS } from './fixtures/screens.tsx'
 export {
   VIOLATION_SCREENS,
   EXEMPTIONS,

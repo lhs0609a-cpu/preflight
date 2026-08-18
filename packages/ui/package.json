@@ -1,5 +1,5 @@
 {
-  "name": "@preflight/testkit",
+  "name": "@preflight/ui",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -8,8 +8,7 @@
   "dependencies": {
     "@preflight/core": "workspace:*",
     "@preflight/render": "workspace:*",
-    "@preflight/session": "workspace:*",
-    "@preflight/tokens": "workspace:*",
-    "@preflight/ui": "workspace:*"
-  }
+    "@preflight/tokens": "workspace:*"
+  },
+  "peerDependencies": { "react": ">=19" }
 }

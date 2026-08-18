@@ -1,17 +1,22 @@
 import { describe, expect, it } from 'vitest'
 import { scanWordless } from './wordless.ts'
-import { CLIENT_SCREENS } from './fixtures/screens.ts'
+import { CLIENT_SCREENS } from './fixtures/screens.tsx'
 import { EXEMPTIONS, STALE_EXEMPTIONS, VIOLATION_SCREENS } from './fixtures/violations.ts'
 
 describe('무언어 검사기 — G-5', () => {
-  it('클라이언트 화면 골격은 통과한다', () => {
+  it('실제 클라이언트 화면 전부가 통과한다', () => {
     const { violations } = scanWordless(CLIENT_SCREENS, EXEMPTIONS)
     expect(violations).toEqual([])
   })
 
-  it('C-06 톤 샘플 예외가 실제로 쓰인다', () => {
-    const { usedExemptions } = scanWordless(CLIENT_SCREENS, EXEMPTIONS)
-    expect(usedExemptions).toEqual(['c06-tone-samples'])
+  it('예외 없이 통과한다 — 지금은 등재된 예외가 0개다', () => {
+    expect(EXEMPTIONS).toHaveLength(0)
+    expect(scanWordless(CLIENT_SCREENS, EXEMPTIONS).usedExemptions).toEqual([])
+  })
+
+  it('프로파일 4종 × 화면들을 실제로 렌더해서 본다 — 픽스처가 아니다', () => {
+    expect(CLIENT_SCREENS.length).toBeGreaterThanOrEqual(20)
+    expect(CLIENT_SCREENS.every((s) => s.html.includes('data-screen='))).toBe(true)
   })
 
   it('5단어짜리 명령문도 막는다 — 단어 수만으로는 못 잡는 구멍', () => {
@@ -64,6 +69,14 @@ describe('무언어 검사기 — G-5', () => {
     const { violations } = scanWordless(CLIENT_SCREENS, STALE_EXEMPTIONS)
     expect(violations).toHaveLength(1)
     expect(violations[0]).toMatchObject({ rule: 'stale-exemption', path: 'nobody-uses-this' })
+  })
+
+  it('예외가 쓰이면 통과하고 사용 기록이 남는다', () => {
+    const html = `<p data-wordless-exempt="tone">Sick today? Seen today.</p>`
+    const exemption = [{ id: 'tone', screen: 'C-06', reason: '결과물이 영문이다' }]
+    const r = scanWordless([{ id: 'C-06', html }], exemption)
+    expect(r.violations).toEqual([])
+    expect(r.usedExemptions).toEqual(['tone'])
   })
 
   it('aria-label 은 검사하지 않는다 (NFR-4.4)', () => {

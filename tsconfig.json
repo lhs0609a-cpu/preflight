@@ -6,6 +6,7 @@
     "moduleResolution": "Bundler",
     "resolveJsonModule": true,
     "allowImportingTsExtensions": true,
+    "jsx": "react-jsx",
     "noEmit": true,
     "strict": true,
     "exactOptionalPropertyTypes": true,
@@ -23,9 +24,13 @@
       "@preflight/render/*": ["packages/render/src/*"],
       "@preflight/tokens": ["packages/tokens/src/index.ts"],
       "@preflight/testkit": ["packages/testkit/src/index.ts"],
-      "@preflight/testkit/*": ["packages/testkit/src/*"]
+      "@preflight/testkit/*": ["packages/testkit/src/*"],
+      "@preflight/session": ["packages/session/src/index.ts"],
+      "@preflight/session/*": ["packages/session/src/*"],
+      "@preflight/ui": ["packages/ui/src/index.ts"],
+      "@preflight/ui/*": ["packages/ui/src/*"]
     }
   },
-  "include": ["packages/**/*.ts", "apps/**/*.ts", "tools/**/*.ts", "*.ts"],
+  "include": ["packages/**/*.ts", "packages/**/*.tsx", "apps/**/*.ts", "apps/**/*.tsx", "tools/**/*.ts", "*.ts"],
   "exclude": ["node_modules", "**/node_modules"]
 }
