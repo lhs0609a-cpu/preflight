@@ -31,6 +31,7 @@ import {
   SpecConfirm,
   StructurePick,
   TasteCards,
+  Waiting,
 } from '@preflight/ui'
 import type { Screen } from '../wordless.ts'
 import { compileAllProfiles, loadLabelBundle } from '../profiles.ts'
@@ -104,6 +105,13 @@ function screensFor(profile: CompiledProfile): Screen[] {
       lockedAt: '2026-09-02T00:00:00.000Z',
     })
     out.push(html(`${profile.slug}/C-10`, <Done spec={spec} dict={dict} />))
+    // 04 §5.2 검토 대기. 화면이 없으면 게이지만 남은 빈 페이지가 뜬다
+    out.push(
+      html(
+        `${profile.slug}/C-WAIT`,
+        <Waiting locked={spec.lines.length} total={spec.lines.length} hoursLeft={18} />,
+      ),
+    )
   }
 
   const structure = blockWith(profile, 'PICK_N')

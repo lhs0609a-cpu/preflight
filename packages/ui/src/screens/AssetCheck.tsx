@@ -3,6 +3,10 @@
  *
  * 미제공 항목에 대행 금액을, 하단에 지연 일수를 붙인다.
  * **재촉이 아니라 계산 결과다** — 문장 없이 그 사실을 전달하는 방법은 숫자뿐이다.
+ *
+ * 왼쪽 버튼은 업로드가 **아니다.** "보냈음" 체크다. 파일은 마켓플레이스로 가야
+ * 하고 여기서 받으면 전송 안 함 원칙이 무너진다 (09 §2.2). 그래서 아이콘도
+ * upload 가 아니라 check 다 — 아이콘이 없는 기능을 약속하면 안 된다.
  */
 import type { ReactNode } from 'react'
 import type { BlockConfig } from '@preflight/core'
@@ -51,10 +55,10 @@ export function AssetCheck({
                   <button
                     type="button"
                     className="pf-chip"
-                    aria-label={`Upload ${dict[item.labelKey] ?? item.labelKey}`}
+                    aria-label={`Mark ${dict[item.labelKey] ?? item.labelKey} as already sent`}
                     onClick={() => onProvide?.(item.labelKey)}
                   >
-                    <Icon name="upload" size={14} />
+                    <Icon name="check" size={14} />
                   </button>
                   {item.fallbackAmountUsd !== undefined && (
                     <button
@@ -73,7 +77,7 @@ export function AssetCheck({
         })}
       </ul>
 
-      <footer className="pf-totals" aria-label="Materials received and days the start is delayed">
+      <footer className="pf-totals" aria-live="polite" aria-label="Materials received and days the start is delayed">
         <Ratio num={provided} den={total} />
         <Icon name="clock" size={16} />
         <Num value={delayedDays} unit="d" />

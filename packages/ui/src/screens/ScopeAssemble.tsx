@@ -51,7 +51,7 @@ export function ScopeAssemble({
         })}
       </ul>
 
-      <footer className="pf-totals" aria-label="Running total and timeline">
+      <footer className="pf-totals" aria-live="polite" aria-label="Running total and timeline">
         <Num value={amountUsd} unit="$" />
         <Icon name="clock" size={16} />
         <Num value={weeks} unit="w" />

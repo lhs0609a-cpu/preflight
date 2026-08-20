@@ -11,6 +11,7 @@
 import {
   clientBlockViews,
   compileSpec,
+  evaluateAssets,
   evaluateGate,
   formatSessionNo,
   invariant,
@@ -25,6 +26,7 @@ import {
   respond as respondToProposal,
   assertProposals,
   toClientView,
+  type AssetState,
   type AssetStates,
   type BlockConfig,
   type BlockOutput,
@@ -65,6 +67,8 @@ export interface IssueInput {
   readonly profile: CompiledProfile
   readonly clientLabel?: string
   readonly marketplace?: string
+  /** 04 §5.2 검토 관문. 기본 꺼짐 — store.ts 의 reviewGate 주석 참고 */
+  readonly reviewGate?: boolean
 }
 
 export interface IssueResult {
@@ -91,6 +95,17 @@ export interface ClientView {
   readonly startBlocked: boolean
   readonly delayedDays: number
   readonly canSettle: boolean
+  /** 미응답 역제안 수. 0 이 아니면 확정이 막힌다 */
+  readonly pendingNegotiations: number
+  /** 04 §5.2 검토 관문이 켜진 세션인가 */
+  readonly reviewGate: boolean
+  /** 관문이 켜져 있고 아직 프리랜서가 보지 않았다 */
+  readonly reviewPending: boolean
+  readonly settled: boolean
+  readonly opened: boolean
+  /** 자료 블록 진행. 없으면 0 / 0 */
+  readonly assetsProvided: number
+  readonly assetsTotal: number
 }
 
 export interface AnswerResult {
@@ -181,7 +196,10 @@ export class SessionService {
       negotiations: [],
       axisOverrides: {},
       revisionsUsed: 0,
+      requests: [],
       pnrPassedAt: null,
+      reviewGate: input.reviewGate ?? false,
+      reviewedAt: null,
       createdAt: now,
       openedAt: null,
       settledAt: null,
@@ -230,15 +248,56 @@ export class SessionService {
     return this.#viewOf(await this.#require(token))
   }
 
+  /**
+   * 04 §6 — 미제공 자료가 며칠째 밀려 있는가.
+   *
+   * 저장하지 않고 **읽는 시점에 파생**한다. 저장하면 배치 작업이 필요하고,
+   * 그 배치가 안 돌면 화면이 조용히 틀린 숫자를 보여준다.
+   * 이미 제공됐거나 대행을 택한 항목은 대상이 아니다.
+   */
+  #assetsNow(r: SessionRecord): AssetStates {
+    if (r.openedAt === null) return r.assets
+    const days = Math.floor((Date.parse(this.#clock.now()) - Date.parse(r.openedAt)) / 86_400_000)
+    if (!Number.isFinite(days) || days <= 0) return r.assets
+
+    const out: Record<string, AssetState> = { ...r.assets }
+    for (const block of r.profile.blocks) {
+      const config = block.config
+      if (config.kind !== 'CHECKLIST' || config.mode !== 'assets') continue
+      for (const item of config.items) {
+        const s = out[item.labelKey] ?? {}
+        if (s.provided === true || s.fallbackTaken === true) continue
+        out[item.labelKey] = { ...s, daysWaiting: days }
+      }
+    }
+    return out
+  }
+
   #viewOf(r: SessionRecord): ClientView {
+    const pending = pendingCount(r.negotiations)
     const gate = evaluateGate(r.profile, {
       settled: new Set(r.settled),
       submitted: new Set(r.submitted),
-      pendingNegotiations: pendingCount(r.negotiations),
+      pendingNegotiations: pending,
     })
-    const totals = totalsOf(r.profile, { scope: r.scope, assets: r.assets })
+    const assets = this.#assetsNow(r)
+    const totals = totalsOf(r.profile, { scope: r.scope, assets })
+    const assetBlock = r.profile.blocks.find(
+      (b) => b.config.kind === 'CHECKLIST' && b.config.mode === 'assets',
+    )
+    const assetCounts =
+      assetBlock === undefined
+        ? { provided: 0, total: 0 }
+        : evaluateAssets(assetBlock.config, assets)
 
     return {
+      pendingNegotiations: pending,
+      reviewGate: r.reviewGate,
+      reviewPending: r.reviewGate && r.reviewedAt === null,
+      settled: r.settledAt !== null,
+      opened: r.openedAt !== null,
+      assetsProvided: assetCounts.provided,
+      assetsTotal: assetCounts.total,
       no: r.no,
       profileIcon: r.profile.blocks[0]?.icon ?? 'grid',
       blocks: clientBlockViews(r.profile, gate),
@@ -366,6 +425,8 @@ export class SessionService {
     const r = await this.#require(token)
     assertProposals(items)
     r.negotiations = items.map((n) => ({ ...n, response: null }))
+    // 04 §5.2 2단계 종료. 이후에는 클라이언트 응답만 남는다
+    r.reviewedAt ??= this.#clock.now()
     await this.#store.put(r)
     return pendingCount(r.negotiations)
   }
@@ -397,7 +458,15 @@ export class SessionService {
   async submitRequest(
     token: string,
     signals: RequestSignals,
-    opts: { readonly outOfScopeUsd?: number } = {},
+    opts: {
+      readonly outOfScopeUsd?: number
+      /** C-11 Q2 — 지적된 축. 기록에 남는다 */
+      readonly axisKey?: string
+      /** C-11 Q3 — 0~100. 50 이 중립 */
+      readonly direction?: number
+      /** C-11 Q4 — 제품 전체에서 유일한 자유 텍스트. 프리랜서만 본다 */
+      readonly note?: string
+    } = {},
   ): Promise<Verdict> {
     const r = await this.#require(token)
     const totals = totalsOf(r.profile, { scope: r.scope, assets: r.assets })
@@ -412,11 +481,41 @@ export class SessionService {
         outOfScopeUsd: opts.outOfScopeUsd ?? Math.round(totals.amountUsd * 0.05),
       },
     )
+
     if (verdict.outcome.kind === 'counted') {
       r.revisionsUsed = verdict.outcome.revisionsAfter.used
-      await this.#store.put(r)
     }
+    // 판정만 하고 버리면 프리랜서가 무엇을 요청받았는지 볼 수 없다.
+    r.requests = [
+      ...r.requests,
+      {
+        id: this.#ids.id(),
+        at: this.#clock.now(),
+        basis: signals.basis,
+        axisKey: opts.axisKey ?? '',
+        direction: opts.direction ?? 50,
+        note: opts.note ?? '',
+        verdict,
+      },
+    ]
+    await this.#store.put(r)
     return verdict
+  }
+
+  /**
+   * 04 §5.2 3~4 — 프리랜서 검토 종료.
+   *
+   * 역제안이 없으면 그대로 확정한다. 있으면 확정하지 않는다 — 클라이언트가
+   * 전부 응답해야 SETTLED 다.
+   */
+  async passReview(token: string): Promise<ClientView> {
+    const r = await this.#require(token)
+    invariant(r.reviewGate, 'REVIEW_GATE_OFF', r.no)
+    invariant(r.settledAt === null, 'ALREADY_SETTLED', r.no)
+    r.reviewedAt ??= this.#clock.now()
+    await this.#store.put(r)
+    if (pendingCount(r.negotiations) === 0) await this.settle(token)
+    return this.view(token)
   }
 
   /** 04 §3 — gated 는 리허설 통과 전 PNR 진입 불가 */
