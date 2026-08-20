@@ -16,8 +16,13 @@
 import type { TokenRef } from '@preflight/tokens'
 import type { IconKey } from './icons.ts'
 
-/** 06 §2.2 — 허용되는 단위 */
-export const UNITS = ['px', '%', '$', 'w', 'd', 's', 'K', 'pt', 'wpm', 'dB', ''] as const
+/**
+ * 06 §2.2 — 허용되는 단위.
+ *
+ * 'h' 는 04 §5.4 때문에 있다. SLA 를 영업일이 아니라 절대 시간(24h/48h)으로
+ * 세는데, 국경 간에서는 "영업일" 의 정의가 서로 다르기 때문이다.
+ */
+export const UNITS = ['px', '%', '$', 'w', 'd', 'h', 's', 'K', 'pt', 'wpm', 'dB', ''] as const
 export type Unit = (typeof UNITS)[number]
 
 export type AssetRef = string & { readonly __asset?: never }

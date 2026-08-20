@@ -46,10 +46,26 @@
   --shadow-2: 0 4px 16px rgb(22 24 28 / 0.08), 0 1px 3px rgb(22 24 28 / 0.06);
   --shadow-3: 0 12px 32px rgb(22 24 28 / 0.12), 0 2px 8px rgb(22 24 28 / 0.06);
 
-  /* 06 §5.1 — 수치가 이 제품의 주어다 */
-  --font-ui: 'Pretendard Variable', Pretendard, Inter, 'Noto Sans', 'Noto Sans KR',
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-  --font-num: 'IBM Plex Mono', 'SFMono-Regular', ui-monospace, 'Cascadia Mono', Menlo, monospace;
+  /*
+   * 06 §5.1 — 수치가 이 제품의 주어다.
+   *
+   * --f-sans / --f-mono 은 next/font 가 html 에 심는다 (_lib/fonts.ts).
+   * 각 var() 에 폴백 이름을 붙여둔 것은 형식이 아니다 — 폴백 없는 var() 가
+   * 미정의면 font-family 선언 **전체**가 무효가 된다.
+   *
+   * 순서에 이유가 있다 — Noto Sans KR 은 라틴 글리프도 갖고 있어서 앞에 두면
+   * 영문까지 Noto 로 그려진다. Inter 가 먼저여야 한글만 Noto 로 떨어진다.
+   *
+   * 셋 다 :root 에서 정의돼야 한다. 커스텀 프로퍼티 안의 var() 는 그 프로퍼티가
+   * **선언된 요소**에서 치환되고 그 결과가 상속되므로, 하위 요소에서 --f-kr 을
+   * 정의해봐야 여기에는 반영되지 않는다.
+   */
+  --font-ui:
+    var(--f-sans, Inter), var(--f-kr, 'Noto Sans KR'), 'Pretendard Variable', Pretendard,
+    'Noto Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-num:
+    var(--f-mono, 'IBM Plex Mono'), 'SFMono-Regular', ui-monospace, 'Cascadia Mono', Menlo,
+    monospace;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -526,212 +542,621 @@ ul {
   white-space: nowrap;
 }
 
-/* ── L-00 랜딩 (프리랜서 대상 · 문장 허용) ───────────────────────────── */
+/* ── L-00 랜딩 (프리랜서 대상 · 문장 허용) ─────────────────────────────
+ *
+ * 클라이언트 화면과 다른 규칙으로 만든다. 저기는 판단을 방해하지 않는 것이
+ * 목적이라 일부러 밋밋하지만, 여기는 **읽히고 눌려야** 한다.
+ *
+ * 다만 색은 같은 팔레트를 쓴다. 랜딩에서 본 파랑이 제품 안에서 "확정" 을
+ * 뜻하는 그 파랑이어야, 처음 쓰는 사람이 화면을 다시 배우지 않는다.
+ * ──────────────────────────────────────────────────────────────────── */
 
 .lp {
-  max-inline-size: 960px;
+  --gutter: clamp(20px, 5vw, 40px);
+  max-inline-size: 1080px;
   margin-inline: auto;
-  padding: var(--s6) var(--s4) var(--s8);
+  padding: var(--s4) var(--gutter) var(--s8);
   display: flex;
   flex-direction: column;
-  gap: var(--s8);
+  gap: clamp(64px, 11vw, 128px);
 }
 
-.lp-eyebrow {
-  font-family: var(--font-num);
-  font-size: 0.8125rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--ink-3);
+/* ── 상단 바 ─────────────────────────────────────────────────────── */
+
+.lp-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--s4);
+  flex-wrap: wrap;
+  padding-block: var(--s4);
 }
+.lp-mark {
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  font-size: 1.0625rem;
+  margin-inline-end: auto;
+}
+
+/*
+ * 언어 선택기를 접어두지 않고 펼쳐 둔다. 자기 언어가 **보이는 것** 자체가
+ * "여기는 내가 읽을 수 있는 곳" 이라는 신호이고, 그게 이 제품의 첫 약속이다.
+ */
+.lp-langs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin: 0;
+  padding: 3px;
+  border-radius: var(--r-full);
+  background: var(--surface);
+  border: 1px solid var(--hair);
+}
+.lp-langs a {
+  display: block;
+  padding: 3px 9px;
+  border-radius: var(--r-full);
+  font-size: 0.75rem;
+  font-family: var(--font-num);
+  color: var(--ink-3);
+  text-decoration: none;
+  transition:
+    background var(--dur) var(--ease),
+    color var(--dur) var(--ease);
+}
+.lp-langs a:hover {
+  color: var(--ink);
+}
+.lp-langs a[aria-current='true'] {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.lp-nav-cta {
+  font-size: 0.875rem;
+  font-weight: 550;
+  color: var(--ink);
+  text-decoration: none;
+  padding: var(--s2) var(--s4);
+  border-radius: var(--r-full);
+  border: 1px solid var(--hair);
+  transition: border-color var(--dur) var(--ease);
+}
+.lp-nav-cta:hover {
+  border-color: var(--ink-3);
+}
+
+/* ── 1. 히어로 ──────────────────────────────────────────────────── */
 
 .lp-hero {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--s4);
   text-align: center;
+  gap: var(--s5);
 }
 
 .lp-hero h1 {
-  font-size: clamp(2rem, 6vw, 3.25rem);
-  line-height: 1.08;
-  letter-spacing: -0.03em;
-  font-weight: 700;
+  display: flex;
+  flex-direction: column;
+  font-size: clamp(2.25rem, 7.5vw, 4rem);
+  font-weight: 680;
+  line-height: 1.03;
+  letter-spacing: -0.038em;
+  margin: 0;
   text-wrap: balance;
+}
+/* 두 번째 줄이 명령이고 약속이다. 색으로 무게를 옮긴다 */
+.lp-h1-accent {
+  color: var(--lock);
 }
 
 .lp-sub {
-  max-inline-size: 34ch;
+  font-size: clamp(1rem, 2.4vw, 1.1875rem);
   color: var(--ink-2);
-  font-size: 1.0625rem;
-  text-wrap: balance;
+  max-inline-size: 46ch;
+  margin: 0;
+  text-wrap: pretty;
+}
+
+/* 데모가 놓이는 무대. 카드가 이 페이지의 주인공이라 배경을 비운다 */
+.lp-stage {
+  inline-size: 100%;
+  max-inline-size: 460px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s3);
+  padding: var(--s5) var(--s4) var(--s6);
+  border-radius: var(--r-lg);
+  background: var(--paper);
+  border: 1px solid var(--hair);
+  box-shadow: var(--shadow-2);
+}
+.lp-stage .pf-screen {
+  padding: 0;
+  gap: var(--s4);
+}
+.lp-stage-top {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+}
+/* 데모 안에서는 진행 표시가 두 번 나올 필요가 없다 */
+.lp-stage .pf-screen > .pf-progress {
+  display: none;
 }
 
 .lp-hint {
-  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s2);
+  font-size: 0.8125rem;
   color: var(--ink-3);
+  animation: lp-nudge 2.2s var(--ease) infinite;
+}
+@keyframes lp-nudge {
+  0%, 100% { transform: translateY(0); opacity: 0.75; }
+  50% { transform: translateY(-3px); opacity: 1; }
 }
 
-.lp-demo {
-  inline-size: min(100%, 380px);
-  padding: var(--s4);
-  border-radius: var(--r-lg);
-  border: 1px solid var(--hair);
-  background: var(--paper);
-  box-shadow: var(--shadow-2);
-  display: flex;
-  flex-direction: column;
-  gap: var(--s3);
-}
+/* ── 완료 — 이 화면이 랜딩 전체에서 가장 중요하다 ─────────────────── */
 
-.lp-demo .pf-screen {
-  padding-block: 0;
-  gap: var(--s3);
+.lp-stage-done {
+  gap: var(--s5);
+  animation: lp-reveal 320ms var(--ease) both;
 }
-
-.lp-demo-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.lp-demo-done {
-  align-items: center;
-}
-
-.lp-again {
-  align-self: center;
-  padding: var(--s2) var(--s5);
-  border-radius: var(--r-full);
-  border: 1px solid var(--hair);
-  font-size: 0.875rem;
-  transition: background var(--dur) var(--ease);
-}
-
-.lp-again:hover {
-  background: var(--surface);
-}
-
-.lp-band {
-  padding: var(--s6) var(--s4);
-  border-radius: var(--r-lg);
-  background: var(--paper);
-  border: 1px solid var(--hair);
-}
-
-.lp-compare {
-  display: grid;
-  gap: var(--s6);
-  grid-template-columns: 1fr;
-}
-
-@media (min-width: 720px) {
-  .lp-compare {
-    grid-template-columns: 1fr 1fr;
+@keyframes lp-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
   }
 }
 
-.lp-k {
-  font-size: 0.75rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--ink-3);
-  margin-block-end: var(--s2);
-}
-
-.lp-quote {
-  font-size: 1.375rem;
-  color: var(--ink-2);
-  margin-block-end: var(--s5);
-}
-
-.lp-zero {
-  font-family: var(--font-num);
-  font-size: 3rem;
-  font-weight: 700;
-  color: var(--stop);
-  line-height: 1;
-}
-
-.lp-spec {
+.lp-result {
+  inline-size: 100%;
   display: flex;
   flex-direction: column;
-  inline-size: 100%;
+  align-items: center;
+  gap: var(--s4);
+}
+.lp-result-top {
+  display: flex;
+  justify-content: center;
 }
 
-.lp-spec li {
+/*
+ * 라벨이 아니라 **수치**를 보여준다. "Wide" 는 다시 해석해야 하지만
+ * "padding 32px" 는 그대로 작업 지시다 — 그 차이가 제품 전체의 논지다.
+ */
+.lp-sheet {
+  inline-size: 100%;
+  margin: 0;
   display: flex;
+  flex-direction: column;
+}
+.lp-sheet > div {
+  display: flex;
+  align-items: baseline;
   justify-content: space-between;
   gap: var(--s4);
-  padding-block: var(--s2);
+  padding-block: var(--s3);
   border-block-start: 1px solid var(--hair);
+}
+.lp-sheet dt {
+  color: var(--ink-2);
   font-size: 0.9375rem;
 }
-
-.lp-spec li span {
-  color: var(--ink-2);
-}
-
-.lp-spec li b {
+.lp-sheet dd {
+  margin: 0;
   font-family: var(--font-num);
   font-variant-numeric: tabular-nums;
   font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--ink);
 }
 
-.lp-types h2,
-.lp-foot p {
-  font-size: 1.25rem;
-  font-weight: 650;
-  letter-spacing: -0.01em;
-  margin-block-end: var(--s4);
-}
-
-.lp-types ul {
-  display: grid;
-  gap: var(--s2);
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-}
-
-.lp-types li {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: var(--s3) var(--s4);
-  border-radius: var(--r-md);
-  border: 1px solid var(--hair);
-  background: var(--paper);
-}
-
-.lp-types li span {
-  font-family: var(--font-num);
-  font-size: 0.75rem;
-  color: var(--ink-3);
-}
-
-.lp-foot {
-  text-align: center;
+.lp-payoff {
+  inline-size: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--s3);
+  text-align: center;
+}
+.lp-payoff-h {
+  font-size: 1.25rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+.lp-payoff-s {
+  font-size: 0.9375rem;
+  color: var(--ink-2);
+  margin: 0;
+  max-inline-size: 34ch;
 }
 
 .lp-cta {
   display: inline-flex;
   align-items: center;
-  min-block-size: 48px;
-  padding-inline: var(--s6);
+  gap: var(--s2);
+  padding: var(--s3) var(--s6);
   border-radius: var(--r-full);
   background: var(--ink);
   color: var(--paper);
   font-weight: 600;
+  font-size: 1rem;
   text-decoration: none;
-  transition: transform var(--dur) var(--ease);
+  box-shadow: var(--shadow-2);
+  transition:
+    transform var(--dur) var(--ease),
+    box-shadow var(--dur) var(--ease);
+}
+.lp-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-3);
+}
+.lp-cta-lg {
+  padding: var(--s4) var(--s7);
+  font-size: 1.0625rem;
+}
+.lp-cta-note {
+  font-size: 0.8125rem;
+  color: var(--ink-3);
+  margin: 0;
 }
 
-.lp-cta:hover {
-  transform: translateY(-1px);
+.lp-again {
+  padding: var(--s2) var(--s4);
+  border-radius: var(--r-full);
+  font-size: 0.8125rem;
+  color: var(--ink-3);
+  transition: color var(--dur) var(--ease);
+}
+.lp-again:hover {
+  color: var(--ink);
+}
+
+/* ── 공통 섹션 ──────────────────────────────────────────────────── */
+
+.lp-sec {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s4);
+}
+.lp-kicker {
+  font-family: var(--font-num);
+  font-size: 0.6875rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--lock);
+  margin: 0;
+}
+.lp-kicker-sub {
+  color: var(--ink-3);
+  margin-block-start: var(--s4);
+}
+.lp-sec h2 {
+  font-size: clamp(1.5rem, 3.6vw, 2.125rem);
+  font-weight: 650;
+  letter-spacing: -0.028em;
+  line-height: 1.15;
+  margin: 0;
+  max-inline-size: 20ch;
+  text-wrap: balance;
+}
+.lp-sec h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 var(--s3);
+  letter-spacing: -0.01em;
+}
+.lp-body {
+  font-size: 1.0625rem;
+  color: var(--ink-2);
+  max-inline-size: 54ch;
+  margin: 0;
+  text-wrap: pretty;
+}
+.lp-caption {
+  font-size: 0.8125rem;
+  color: var(--ink-3);
+  margin: 0;
+}
+
+/* ── 2. 문제 ────────────────────────────────────────────────────── */
+
+.lp-problem {
+  padding: var(--s6) var(--gutter);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  border: 1px solid var(--hair);
+}
+.lp-quote {
+  margin: 0;
+  font-size: clamp(1.5rem, 4.5vw, 2.375rem);
+  font-weight: 350;
+  letter-spacing: -0.02em;
+  color: var(--ink-2);
+  max-inline-size: 18ch;
+}
+.lp-zero-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s5);
+  flex-wrap: wrap;
+}
+.lp-zero-label {
+  font-size: 0.9375rem;
+  color: var(--ink-2);
+  max-inline-size: 30ch;
+  margin: 0;
+}
+.lp-zero {
+  font-family: var(--font-num);
+  font-size: clamp(3.5rem, 11vw, 5.5rem);
+  font-weight: 700;
+  line-height: 0.9;
+  color: var(--stop);
+  margin: 0;
+}
+
+/* 손실의 연쇄. 화살표가 인과를 말한다 */
+.lp-chain {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s3);
+  margin: 0;
+  padding: 0;
+  counter-reset: none;
+}
+.lp-chain li {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--s2) var(--s4);
+  border-radius: var(--r-full);
+  border: 1px solid color-mix(in srgb, var(--stop) 25%, transparent);
+  background: color-mix(in srgb, var(--stop) 7%, transparent);
+  color: var(--stop);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+.lp-chain li + li::before {
+  content: '→';
+  margin-inline: calc(var(--s3) * -1 + 2px) var(--s3);
+  color: var(--ink-3);
+  font-weight: 400;
+}
+
+/* ── 3. 기전 ────────────────────────────────────────────────────── */
+
+.lp-axes {
+  display: grid;
+  gap: var(--s4);
+  grid-template-columns: 1fr;
+  margin: var(--s2) 0 0;
+  padding: 0;
+}
+@media (min-width: 720px) {
+  .lp-axes {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+.lp-axes li {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+  padding: var(--s4);
+  border-radius: var(--r-md);
+  border: 1px solid var(--hair);
+  background: var(--paper);
+}
+.lp-axis-name {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+.lp-axis-pair {
+  display: flex;
+  gap: var(--s2);
+}
+.lp-axis-pair .pf-figure {
+  border-radius: var(--r-sm);
+  overflow: hidden;
+  border: 1px solid var(--hair);
+}
+.lp-axis-m {
+  font-family: var(--font-num);
+  font-size: 0.75rem;
+  color: var(--ink-2);
+}
+.lp-axis-m i {
+  font-style: normal;
+  color: var(--ink-3);
+  margin-inline: 3px;
+}
+
+/* ── 4. 결과물 ──────────────────────────────────────────────────── */
+
+.lp-two {
+  display: grid;
+  gap: var(--s4);
+  grid-template-columns: 1fr;
+}
+@media (min-width: 720px) {
+  .lp-two {
+    grid-template-columns: 1.15fr 1fr;
+  }
+}
+.lp-col {
+  padding: var(--s5);
+  border-radius: var(--r-md);
+  border: 1px solid var(--hair);
+  background: var(--paper);
+}
+/* 프리랜서가 받는 쪽에 무게를 준다 — 이 페이지의 독자가 그 사람이다 */
+.lp-col-lead {
+  background: color-mix(in srgb, var(--lock) 6%, transparent);
+  border-color: color-mix(in srgb, var(--lock) 22%, transparent);
+}
+
+.lp-checks {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+  margin: 0;
+  padding: 0;
+}
+.lp-checks li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--s3);
+  align-items: start;
+  font-size: 0.9375rem;
+}
+.lp-checks .pf-icon {
+  color: var(--agree);
+  margin-block-start: 3px;
+}
+
+.lp-steps-n {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+  margin: 0;
+  padding: 0;
+  counter-reset: s;
+}
+.lp-steps-n li {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: var(--s3);
+  align-items: baseline;
+  font-size: 0.9375rem;
+  counter-increment: s;
+}
+.lp-steps-n li::before {
+  content: counter(s);
+  font-family: var(--font-num);
+  font-size: 0.75rem;
+  color: var(--paper);
+  background: var(--ink-3);
+  border-radius: 50%;
+  inline-size: 20px;
+  block-size: 20px;
+  display: grid;
+  place-items: center;
+}
+
+/* ── 5. 요금 ────────────────────────────────────────────────────── */
+
+.lp-money {
+  padding: var(--s6) var(--gutter);
+  border-radius: var(--r-lg);
+  background: color-mix(in srgb, var(--agree) 7%, transparent);
+  border: 1px solid color-mix(in srgb, var(--agree) 22%, transparent);
+}
+.lp-money h2 {
+  color: var(--agree);
+}
+
+/* ── 6. 안 하는 것 ──────────────────────────────────────────────── */
+
+.lp-nos {
+  display: grid;
+  gap: var(--s3);
+  grid-template-columns: 1fr;
+  margin: var(--s2) 0 0;
+  padding: 0;
+}
+@media (min-width: 860px) {
+  .lp-nos {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+.lp-nos li {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+  padding: var(--s5);
+  border-radius: var(--r-md);
+  border: 1px solid var(--hair);
+  background: var(--paper);
+}
+.lp-nos .pf-icon {
+  color: var(--lock);
+}
+.lp-nos b {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.lp-nos span {
+  font-size: 0.875rem;
+  color: var(--ink-2);
+  line-height: 1.6;
+}
+
+/* ── 7. 유형 ────────────────────────────────────────────────────── */
+
+.lp-types {
+  display: grid;
+  gap: var(--s2);
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  margin: var(--s2) 0 0;
+  padding: 0;
+}
+.lp-types li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  column-gap: var(--s3);
+  align-items: center;
+  padding: var(--s3) var(--s4);
+  border-radius: var(--r-md);
+  border: 1px solid var(--hair);
+  background: var(--paper);
+}
+.lp-types .pf-icon {
+  grid-row: 1 / 3;
+  color: var(--ink-3);
+}
+.lp-types b {
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+.lp-types span {
+  font-family: var(--font-num);
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.lp-types span[data-rev='cheap'] { color: var(--agree); }
+.lp-types span[data-rev='outcome'] { color: var(--cost); }
+.lp-types span[data-rev='gated'] { color: var(--stop); }
+
+/* ── 최종 CTA ───────────────────────────────────────────────────── */
+
+.lp-final {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s4);
+  text-align: center;
+  padding: clamp(48px, 9vw, 88px) var(--gutter);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  border: 1px solid var(--hair);
+}
+.lp-final h2 {
+  font-size: clamp(1.625rem, 4.4vw, 2.5rem);
+  font-weight: 680;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  margin: 0;
+  max-inline-size: 22ch;
+  text-wrap: balance;
 }
 
 /* ── 프리랜서 콘솔 ───────────────────────────────────────────────────── */
@@ -1169,4 +1594,779 @@ ul {
   background: color-mix(in srgb, var(--stop) 12%, transparent);
   color: var(--stop);
   font-size: 0.875rem;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   모션 — 06 §5.5
+
+   이 제품의 핵심 체험은 "카드를 넘긴다" 는 감각이다. 그런데 화면이 툭 바뀌면
+   넘긴 것이 아니라 그냥 바뀐 것이 된다. 아래 넷이 그 차이를 만든다.
+   전부 prefers-reduced-motion 에서 꺼진다.
+   ══════════════════════════════════════════════════════════════════════ */
+
+@keyframes pf-deal {
+  from {
+    opacity: 0;
+    transform: translateX(var(--from, 10px)) scale(0.985);
+  }
+}
+
+/* 새 쌍이 들어온다. TasteCards 가 축마다 key 를 갈아서 매번 다시 돈다 */
+.pf-cards {
+  animation: pf-deal var(--dur) var(--ease) both;
+}
+.pf-cards > :nth-child(2) {
+  --from: -10px;
+}
+
+/* 누른 카드가 손끝에 반응한다 */
+.pf-card {
+  transition:
+    transform var(--dur) var(--ease),
+    box-shadow var(--dur) var(--ease);
+}
+.pf-card:active {
+  transform: scale(0.985);
+}
+@media (hover: hover) {
+  .pf-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-2);
+  }
+}
+
+/*
+ * 게이지가 차오른다. 칸이 10개짜리 이산 렌더라 width 가 아니라 fill 을
+ * 전이시킨다 — 칸마다 지연을 달면 왼쪽부터 켜지는 것이 보인다.
+ */
+.pf-gauge rect {
+  transition: fill 220ms var(--ease);
+}
+.pf-gauge rect:nth-of-type(2) { transition-delay: 24ms; }
+.pf-gauge rect:nth-of-type(3) { transition-delay: 48ms; }
+.pf-gauge rect:nth-of-type(4) { transition-delay: 72ms; }
+.pf-gauge rect:nth-of-type(5) { transition-delay: 96ms; }
+.pf-gauge rect:nth-of-type(6) { transition-delay: 120ms; }
+.pf-gauge rect:nth-of-type(7) { transition-delay: 144ms; }
+.pf-gauge rect:nth-of-type(8) { transition-delay: 168ms; }
+.pf-gauge rect:nth-of-type(9) { transition-delay: 192ms; }
+.pf-gauge rect:nth-of-type(10) { transition-delay: 216ms; }
+
+/* C-10 — 게이지가 다 찬 뒤에 자물쇠가 닫힌다 */
+@keyframes pf-lock {
+  from {
+    opacity: 0;
+    transform: translateY(-3px) scale(0.9);
+  }
+}
+[data-screen="C-10"] .pf-gauge g {
+  animation: pf-lock 180ms var(--ease) 240ms both;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* ── 새 화면 조각 ─────────────────────────────────────────────────── */
+
+/* C-WAIT — 남은 시간. 문장이 아니라 시계 + 숫자다 */
+.pf-wait {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s2);
+  color: var(--ink-2);
+  margin-block-start: var(--s2);
+}
+
+/* 문장을 쓸 수 없으므로 자리만 잡는다. 스피너도 기호다 */
+.pf-pending {
+  inline-size: 28px;
+  block-size: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--mute);
+  border-block-start-color: var(--lock);
+  animation: pf-spin 700ms linear infinite;
+  justify-self: center;
+  align-self: center;
+}
+@keyframes pf-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 부차적 동작. pf-primary 보다 약하게 */
+.pf-ghost {
+  min-inline-size: 48px;
+  min-block-size: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-full);
+  border: 1px solid var(--hair);
+  color: var(--ink-2);
+  transition:
+    border-color var(--dur) var(--ease),
+    color var(--dur) var(--ease);
+}
+.pf-ghost:hover {
+  border-color: var(--mute);
+  color: var(--ink);
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   프리랜서 콘솔
+   ══════════════════════════════════════════════════════════════════════ */
+
+.pro-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--s2) var(--s4);
+}
+.pro-back {
+  flex-basis: 100%;
+  font-size: 0.8125rem;
+  color: var(--ink-2);
+  text-decoration: none;
+}
+.pro-back:hover {
+  color: var(--ink);
+}
+
+.pro-step {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 22px;
+  block-size: 22px;
+  border-radius: 50%;
+  background: var(--lock);
+  color: var(--paper);
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: var(--font-num);
+}
+
+.pro-count {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.8125rem;
+  color: var(--ink-3);
+  margin-inline-start: var(--s2);
+}
+
+/* 유형 선택 — 네이티브 select 로는 reversibility 를 함께 보여줄 수 없다 */
+.pro-picker {
+  border: 0;
+  padding: 0;
+  margin: 0 0 var(--s4);
+  display: grid;
+  gap: var(--s2);
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+}
+.pro-picker legend {
+  font-size: 0.8125rem;
+  color: var(--ink-2);
+  padding: 0;
+  margin-block-end: var(--s2);
+}
+.pro-pick {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: var(--s3) var(--s4);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-md);
+  background: var(--paper);
+  cursor: pointer;
+  transition:
+    border-color var(--dur) var(--ease),
+    background var(--dur) var(--ease);
+}
+.pro-pick:hover {
+  border-color: var(--mute);
+}
+.pro-pick[data-on="true"] {
+  border-color: var(--lock);
+  background: color-mix(in srgb, var(--lock) 7%, transparent);
+}
+.pro-pick input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.pro-pick:focus-within {
+  outline: 2px solid var(--lock);
+  outline-offset: 2px;
+}
+.pro-pick b {
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+.pro-rev {
+  font-family: var(--font-num);
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.pro-rev[data-rev="cheap"] { color: var(--agree); }
+.pro-rev[data-rev="outcome"] { color: var(--cost); }
+.pro-rev[data-rev="gated"] { color: var(--stop); }
+
+/* 04 §5.2 검토 관문. 기본 꺼짐이며 켜면 클라이언트가 다시 와야 한다 */
+.pro-switch {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--s3);
+  align-items: start;
+  padding: var(--s3) var(--s4);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  margin-block-start: var(--s3);
+  cursor: pointer;
+}
+.pro-switch input {
+  inline-size: 18px;
+  block-size: 18px;
+  margin-block-start: 3px;
+  accent-color: var(--lock);
+}
+.pro-switch b {
+  display: block;
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+.pro-switch i {
+  display: block;
+  font-style: normal;
+  font-size: 0.8125rem;
+  color: var(--ink-2);
+  margin-block-start: 2px;
+}
+
+.pro-form label i {
+  font-style: normal;
+  color: var(--ink-3);
+  font-size: 0.75rem;
+  margin-inline-start: var(--s1);
+}
+
+/* 지금 손이 필요한 세션이 한눈에 보여야 한다. 색 + 위치 + 개수 */
+.pro-flag {
+  inline-size: 7px;
+  block-size: 7px;
+  border-radius: 50%;
+}
+.pro-flag[data-k="review"] { background: var(--cost); }
+.pro-flag[data-k="sent"] { background: var(--lock); }
+.pro-flag[data-k="req"] { background: var(--stop); }
+
+.pro-row-state::before {
+  content: "";
+  display: inline-block;
+  inline-size: 6px;
+  block-size: 6px;
+  border-radius: 50%;
+  margin-inline-end: 5px;
+  vertical-align: 1px;
+  background: currentColor;
+}
+.pro-row-state[data-dot="issued"] { color: var(--ink-3); }
+.pro-row-state[data-dot="open"] { color: var(--lock); }
+.pro-row-state[data-dot="settled"] { color: var(--agree); }
+.pro-row-state[data-dot="dead"] { color: var(--stop); }
+
+/* ── P-05 검토 ──────────────────────────────────────────────────── */
+
+.pro-axes {
+  display: flex;
+  flex-direction: column;
+  margin-block: var(--s3);
+}
+.pro-axis {
+  display: grid;
+  grid-template-columns: auto minmax(70px, auto) 1fr auto 1fr;
+  align-items: center;
+  gap: var(--s3);
+  padding: var(--s3) var(--s2);
+  border-block-end: 1px solid var(--hair);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: background var(--dur) var(--ease);
+}
+.pro-axis:hover {
+  background: var(--surface);
+}
+.pro-axis[data-on="true"] {
+  background: color-mix(in srgb, var(--lock) 8%, transparent);
+}
+.pro-axis input {
+  inline-size: 17px;
+  block-size: 17px;
+  accent-color: var(--lock);
+}
+.pro-axis b {
+  font-weight: 500;
+  font-size: 0.9375rem;
+}
+/* measure 는 번역하지 않는다 (02 §3) — 그래서 서체도 수치용이다 */
+.pro-m {
+  font-family: var(--font-num);
+  font-size: 0.8125rem;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+}
+.pro-m-next {
+  color: var(--lock);
+  font-weight: 500;
+}
+.pro-arrow {
+  color: var(--ink-3);
+  font-size: 0.875rem;
+}
+
+.pro-reason {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s1);
+  font-size: 0.8125rem;
+  color: var(--ink-2);
+}
+.pro-reason textarea {
+  font: inherit;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--mute);
+  border-radius: var(--r-sm);
+  padding: var(--s2) var(--s3);
+  resize: vertical;
+}
+.pro-reason textarea:disabled {
+  background: var(--surface);
+}
+
+.pro-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s3);
+  margin-block-start: var(--s4);
+}
+.pro-btn-ghost {
+  background: none;
+  color: var(--ink);
+  border: 1px solid var(--mute);
+}
+.pro-btn-ghost:hover:not(:disabled) {
+  border-color: var(--ink-3);
+}
+.pro-btn b {
+  font-family: var(--font-num);
+  margin-inline-start: var(--s1);
+}
+
+.pro-note[data-k="ok"] { color: var(--agree); }
+.pro-note[data-k="wait"] { color: var(--cost); }
+
+/* ── C-11 수정 요청 목록 ────────────────────────────────────────── */
+
+.pro-reqs {
+  display: flex;
+  flex-direction: column;
+}
+.pro-reqs li {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: center;
+  gap: var(--s3);
+  padding: var(--s3) 0;
+  border-block-end: 1px solid var(--hair);
+}
+.pro-req-basis,
+.pro-req-out {
+  font-family: var(--font-num);
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: var(--r-full);
+  border: 1px solid var(--hair);
+}
+.pro-req-basis[data-basis="off"] { color: var(--agree); }
+.pro-req-basis[data-basis="taste"] { color: var(--lock); }
+.pro-req-basis[data-basis="change"] { color: var(--stop); }
+.pro-req-out[data-k="free"] { color: var(--agree); }
+.pro-req-out[data-k="counted"] { color: var(--lock); }
+.pro-req-out[data-k="requote"],
+.pro-req-out[data-k="out-of-scope"],
+.pro-req-out[data-k="new-session"] { color: var(--cost); }
+/* 제품 전체에서 유일한 자유 텍스트. 클라이언트 로케일 그대로 온다 */
+.pro-req-note {
+  grid-column: 1 / -1;
+  font-size: 0.875rem;
+  color: var(--ink-2);
+  padding-inline-start: var(--s3);
+  border-inline-start: 2px solid var(--hair);
+}
+
+/* ── 알림 · 골격 · 에러 ─────────────────────────────────────────── */
+
+.pro-toast {
+  position: fixed;
+  inset-block-end: var(--s5);
+  inset-inline: 0;
+  margin-inline: auto;
+  inline-size: fit-content;
+  padding: var(--s2) var(--s5);
+  border-radius: var(--r-full);
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 0.875rem;
+  box-shadow: var(--shadow-3);
+  opacity: 0;
+  transform: translateY(6px);
+  pointer-events: none;
+  transition:
+    opacity var(--dur) var(--ease),
+    transform var(--dur) var(--ease);
+}
+.pro-toast[data-on="true"] {
+  opacity: 1;
+  transform: none;
+}
+
+.pro-skel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+}
+.pro-skel li {
+  block-size: 44px;
+  border-radius: var(--r-sm);
+  background: linear-gradient(90deg, var(--surface), var(--mute), var(--surface));
+  background-size: 300% 100%;
+  animation: pf-shimmer 1.4s ease-in-out infinite;
+}
+@keyframes pf-shimmer {
+  to {
+    background-position: -300% 0;
+  }
+}
+
+.pro-error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s3);
+}
+.pro-error-cta {
+  color: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   고대비 — NFR-1.3
+
+   1px 헤어라인은 고대비 모드에서 사라진다. 이 UI 는 카드도 행도 전부 경계로만
+   구분되므로, 경계가 사라지면 읽을 수 없는 화면이 된다.
+   ══════════════════════════════════════════════════════════════════════ */
+@media (prefers-contrast: more) {
+  :root {
+    --hair: var(--ink-3);
+    --mute: var(--ink-2);
+  }
+  .pf-card,
+  .pro-pick,
+  .pro-card {
+    border-width: 2px;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   P-01 가입
+
+   이탈이 가장 많은 자리는 2단계(결제수단)다. 그래서 그 카드는 안심 문장이
+   입력란보다 위에 오고, 색도 비용(cost)이 아니라 확정(lock) 쪽을 쓴다 —
+   지금 돈이 나가는 화면이 아니기 때문이다.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.su {
+  --gutter: clamp(20px, 5vw, 40px);
+  max-inline-size: 640px;
+  margin-inline: auto;
+  padding: var(--s4) var(--gutter) var(--s8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s4);
+}
+
+.su-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s4);
+  padding-block: var(--s4);
+}
+.su-nav .lp-mark {
+  color: inherit;
+  text-decoration: none;
+}
+/* 남은 시간을 먼저 말한다. 2분이면 시작하지 않을 이유가 없다 */
+.su-time {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s2);
+  font-size: 0.8125rem;
+  color: var(--ink-2);
+  padding: var(--s1) var(--s3);
+  border-radius: var(--r-full);
+  background: var(--surface);
+  border: 1px solid var(--hair);
+}
+
+.su-head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+  margin-block-end: var(--s2);
+}
+.su-head h1 {
+  font-size: clamp(1.625rem, 5vw, 2.25rem);
+  font-weight: 680;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  margin: 0;
+  text-wrap: balance;
+}
+.su-head p {
+  font-size: 1rem;
+  color: var(--ink-2);
+  margin: 0;
+  max-inline-size: 44ch;
+}
+
+/* 남은 일이 보이면 끝까지 간다 */
+.su-rail {
+  block-size: 3px;
+  border-radius: var(--r-full);
+  background: var(--mute);
+  overflow: hidden;
+}
+.su-rail-fill {
+  display: block;
+  block-size: 100%;
+  background: var(--lock);
+  transition: inline-size 320ms var(--ease);
+}
+
+.su-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s4);
+  padding: var(--s5);
+  border-radius: var(--r-lg);
+  border: 1px solid var(--hair);
+  background: var(--paper);
+  transition:
+    border-color var(--dur) var(--ease),
+    opacity var(--dur) var(--ease);
+}
+/* 지금 할 차례인 카드만 또렷하다 */
+.su-card[data-on='false'] {
+  opacity: 0.62;
+}
+.su-card[data-on='true'] {
+  border-color: color-mix(in srgb, var(--lock) 40%, transparent);
+  box-shadow: var(--shadow-2);
+}
+
+.su-card h2 {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  font-size: 1.0625rem;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+  margin: 0;
+}
+.su-step {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 24px;
+  block-size: 24px;
+  border-radius: 50%;
+  background: var(--lock);
+  color: var(--paper);
+  font-family: var(--font-num);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.su-step[data-done='true'] {
+  background: var(--agree);
+}
+
+.su-grid {
+  display: grid;
+  gap: var(--s4);
+  grid-template-columns: 1fr;
+}
+@media (min-width: 560px) {
+  .su-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.su-row {
+  display: grid;
+  gap: var(--s3);
+  grid-template-columns: 1fr;
+  align-items: end;
+}
+@media (min-width: 560px) {
+  .su-row {
+    grid-template-columns: 1fr auto;
+  }
+}
+
+.su label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+  font-size: 0.8125rem;
+  color: var(--ink-2);
+}
+.su label i {
+  font-style: normal;
+  color: var(--ink-3);
+  margin-inline-start: var(--s1);
+}
+.su input,
+.su select {
+  min-block-size: 46px;
+  padding-inline: var(--s3);
+  border-radius: var(--r-sm);
+  border: 1px solid var(--mute);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  transition: border-color var(--dur) var(--ease);
+}
+.su input:focus,
+.su select:focus {
+  border-color: var(--lock);
+}
+.su input:disabled,
+.su select:disabled {
+  background: var(--surface);
+  color: var(--ink-2);
+}
+
+.su-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s2);
+  align-self: start;
+  min-block-size: 46px;
+  padding-inline: var(--s6);
+  border-radius: var(--r-full);
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 600;
+  transition:
+    transform var(--dur) var(--ease),
+    box-shadow var(--dur) var(--ease);
+}
+.su-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-2);
+}
+
+/* 이탈이 가장 많은 자리. 입력란보다 위에 온다 */
+.su-reassure {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s3);
+  margin: 0;
+  padding: var(--s3) var(--s4);
+  border-radius: var(--r-md);
+  background: color-mix(in srgb, var(--lock) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--lock) 24%, transparent);
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}
+.su-reassure .pf-icon {
+  color: var(--lock);
+  flex: none;
+  margin-block-start: 2px;
+}
+.su-note {
+  font-size: 0.8125rem;
+  color: var(--ink-2);
+  line-height: 1.65;
+  margin: 0;
+}
+
+.su-done {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s3);
+  text-align: center;
+  padding: var(--s6) var(--s5);
+  border-radius: var(--r-lg);
+  background: color-mix(in srgb, var(--agree) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--agree) 26%, transparent);
+  animation: lp-reveal 320ms var(--ease) both;
+}
+.su-done .pf-icon {
+  color: var(--agree);
+}
+.su-done-h {
+  font-size: 1.0625rem;
+  font-weight: 650;
+  margin: 0;
+}
+
+/* 계정 정지가 이 시장의 가장 큰 공포다. 가입 직전에 다시 말한다 */
+.su-trust {
+  display: grid;
+  gap: var(--s3);
+  grid-template-columns: 1fr;
+  margin: var(--s4) 0 0;
+  padding: 0;
+}
+@media (min-width: 720px) {
+  .su-trust {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+.su-trust li {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s1);
+  padding: var(--s4);
+  border-radius: var(--r-md);
+  border: 1px solid var(--hair);
+  background: var(--surface);
+}
+.su-trust .pf-icon {
+  color: var(--lock);
+}
+.su-trust b {
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+.su-trust span {
+  font-size: 0.75rem;
+  color: var(--ink-2);
+  line-height: 1.55;
+}
+
+/* 중간 CTA — 데모를 건너뛴 사람의 경로. 섹션이 아니라 사이에 놓인다 */
+.lp-mid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s2);
+  margin-block: calc(var(--s6) * -1);
 }

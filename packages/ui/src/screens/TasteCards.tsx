@@ -38,7 +38,17 @@ export function TasteCards({
         <Ratio num={cursor + 1} den={total} />
       </header>
 
-      <div className="pf-cards" role="group" aria-label="Two options that differ in exactly one aspect">
+      {/*
+        key 에 축을 물린 이유는 애니메이션이다. 축이 바뀌면 React 가 이 노드를
+        새로 마운트하고 그때 CSS 애니메이션이 다시 돈다 — 같은 DOM 을 재사용하면
+        카드가 툭 바뀌어서 "넘긴다" 는 감각이 사라진다.
+      */}
+      <div
+        key={pair.axisKey}
+        className="pf-cards"
+        role="group"
+        aria-label="Two options that differ in exactly one aspect"
+      >
         {pair.pair.map((card) => (
           <button
             key={card.side}

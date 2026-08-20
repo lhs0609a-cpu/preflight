@@ -58,6 +58,27 @@ export type Outcome =
       readonly daysDelta: number
     }
 
+/**
+ * 03 §2.11 — 제출된 수정 요청 한 건.
+ *
+ * 판정만 하고 버리면 프리랜서가 무엇을 요청받았는지 볼 수 없다. C-11 이
+ * 화면만 있고 아무 일도 안 하는 상태가 되므로 요청을 남긴다.
+ *
+ * note 는 **제품 전체에서 유일한 자유 텍스트**다. 클라이언트 로케일로 들어오고
+ * 프리랜서 화면에서만 보인다 — 클라이언트에게 되돌아가지 않는다.
+ */
+export interface RevisionRequest {
+  readonly id: string
+  readonly at: string
+  readonly basis: Basis
+  /** 지적된 확정 축. spec.lines 의 key */
+  readonly axisKey: string
+  /** 0~100. 50 이 중립이고 양끝이 강한 변경이다 */
+  readonly direction: number
+  readonly note: string
+  readonly verdict: Verdict
+}
+
 export interface Verdict {
   readonly basis: Basis
   /** 자동 재분류가 일어났으면 원래 근거 */

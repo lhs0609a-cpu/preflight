@@ -12,6 +12,7 @@ import type {
   ChecklistSelection,
   CompiledProfile,
   NegotiationProposal,
+  RevisionRequest,
   SessionState,
   Side,
   SpecLine,
@@ -55,8 +56,29 @@ export interface SessionRecord {
   axisOverrides: Record<string, SpecLine>
   /** 04 §4 — 차감된 수정 횟수 */
   revisionsUsed: number
+  /** FR-9 — 제출된 수정 요청. 판정만 하고 버리면 프리랜서가 볼 것이 없다 */
+  requests: RevisionRequest[]
   /** 04 §3 — 되돌림 한계점 통과 시각 */
   pnrPassedAt: string | null
+  /**
+   * 04 §5.2 — 클라이언트가 전 블록을 확정한 뒤 프리랜서 검토를 거칠지.
+   *
+   * 발급 시 정해지고 이후 바뀌지 않는다. 진행 중에 켜면 클라이언트가 이미 본
+   * 완료 화면이 대기 화면으로 되돌아간다.
+   *
+   * 기본은 꺼짐이다. 켜면 클라이언트가 다시 와야 하는데 알림 전송 채널이
+   * 아직 없어서(13 §6), 상시로 켜면 세션이 그냥 멈춘다. 링크 전달을 이미
+   * 사람이 손으로 하므로 "다시 열어주세요" 도 같은 경로로 보내면 된다.
+   */
+  readonly reviewGate: boolean
+  /**
+   * 04 §5.2 2단계가 끝난 시각. 프리랜서가 역제안을 올렸거나 그냥 통과시킨 때다.
+   *
+   * 관문을 "켜져 있음" 하나로만 판단하면, 검토가 끝나고 클라이언트가 역제안에
+   * 전부 응답한 뒤에도 확정이 막힌다 — 04 §5.2 4번("전 항목 응답 시 SETTLED")이
+   * 성립하지 않는다. 관문은 켜짐이 아니라 **아직 검토 전**일 때 막는 것이다.
+   */
+  reviewedAt: string | null
   readonly createdAt: string
   openedAt: string | null
   settledAt: string | null

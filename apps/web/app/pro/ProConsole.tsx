@@ -1,20 +1,19 @@
 'use client'
 
 /**
- * 06 §4 — 복사 버튼만 있다. 전송 버튼은 없다.
+ * P-02 링크 발급 + P-03 세션 목록 — 06 §4.
  *
- * "자동으로 보내주면 편할 텐데"라는 요청이 와도 만들지 않는다 (09 §6 G-3).
- * 그 편의의 대가가 고객 계정이다. UI 차원에서 유혹을 제거한다.
+ * 복사 버튼만 있다. 전송 버튼은 없다. "자동으로 보내주면 편할 텐데" 라는 요청이
+ * 와도 만들지 않는다 (09 §6 G-3) — 그 편의의 대가가 고객 계정이다.
+ *
+ * 상세는 아코디언이 아니라 `/pro/s/{token}` 라우트다. 아코디언이면 새로고침에
+ * 닫히고 링크로 남길 수도 없다.
  */
+import Link from 'next/link'
 import { useState, useTransition } from 'react'
-import {
-  deliverables,
-  issueLink,
-  listSessions,
-  type Deliverables,
-  type IssuedLink,
-  type SessionRow,
-} from '../_lib/actions.ts'
+import type { Copy } from '../_lib/copy.ts'
+import { issueLink, type IssuedLink, type SessionRow } from '../_lib/actions.ts'
+import { Copyable, ErrorNote, useToast } from './_ui.tsx'
 
 interface ProfileOption {
   readonly slug: string
@@ -22,168 +21,166 @@ interface ProfileOption {
   readonly reversibility: string
 }
 
+/** 04 §1 세션 상태를 색 + 모양으로. 색만으로 구분하지 않는다 (NFR-1.3) */
+const STATE_DOT: Readonly<Record<string, string>> = {
+  ISSUED: 'issued',
+  OPENED: 'open',
+  IN_PROGRESS: 'open',
+  SETTLED: 'settled',
+  EXPIRED: 'dead',
+  ABANDONED: 'dead',
+}
+
 export function ProConsole({
   rows: initialRows,
   profiles,
+  t,
 }: {
   readonly rows: readonly SessionRow[]
   readonly profiles: readonly ProfileOption[]
+  readonly t: Copy
 }) {
-  const [rows, setRows] = useState(initialRows)
+  const [rows] = useState(initialRows)
   const [slug, setSlug] = useState(profiles[0]?.slug ?? '')
   const [label, setLabel] = useState('')
+  const [gate, setGate] = useState(false)
   const [issued, setIssued] = useState<IssuedLink | null>(null)
-  const [open, setOpen] = useState<string | null>(null)
-  const [docs, setDocs] = useState<Deliverables | null>(null)
+  const [error, setError] = useState<string | null>(null)
   const [pending, start] = useTransition()
-
-  const refresh = () => void listSessions().then(setRows)
+  const { toast, show } = useToast()
 
   return (
     <div className="pro">
       <header className="pro-head">
         <h1>Preflight</h1>
-        <p>Agree before you start. In any language.</p>
+        <p>{t.tagline}</p>
       </header>
 
       <section className="pro-card">
-        <h2>새 확정 링크</h2>
+        <h2>{t.issueTitle}</h2>
+
+        {/* 유형은 네이티브 select 가 아니라 카드다 — reversibility 가 함께 보여야 한다 */}
+        <fieldset className="pro-picker">
+          <legend>{t.issueType}</legend>
+          {profiles.map((p) => (
+            <label key={p.slug} className="pro-pick" data-on={slug === p.slug}>
+              <input
+                type="radio"
+                name="slug"
+                value={p.slug}
+                checked={slug === p.slug}
+                onChange={() => setSlug(p.slug)}
+              />
+              <b>{p.name}</b>
+              <span className="pro-rev" data-rev={p.reversibility}>
+                {p.reversibility}
+              </span>
+            </label>
+          ))}
+        </fieldset>
+
         <div className="pro-form">
           <label>
-            <span>거래 유형</span>
-            <select value={slug} onChange={(e) => setSlug(e.currentTarget.value)}>
-              {profiles.map((p) => (
-                <option key={p.slug} value={p.slug}>
-                  {p.name} · {p.reversibility}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            <span>클라이언트 메모</span>
-            <input
-              value={label}
-              placeholder="Acme Corp"
-              onChange={(e) => setLabel(e.currentTarget.value)}
-            />
+            <span>
+              {t.issueLabel} <i>{t.issueLabelHint}</i>
+            </span>
+            <input value={label} placeholder="Acme Corp" onChange={(e) => setLabel(e.currentTarget.value)} />
           </label>
           <button
             type="button"
             className="pro-btn"
             disabled={pending || slug === ''}
             onClick={() => {
+              setError(null)
               start(() => {
-                void issueLink(slug, label).then((r) => {
-                  setIssued(r)
-                  refresh()
+                void issueLink(slug, label, gate).then((r) => {
+                  if (r.ok) setIssued(r.value)
+                  else setError(r.code)
                 })
               })
             }}
           >
-            링크 발급
+            {t.issueSubmit}
           </button>
         </div>
+
+        {/* 04 §5.2 — 기본은 꺼짐. 켜면 클라이언트가 다시 와야 한다 */}
+        <label className="pro-switch">
+          <input type="checkbox" checked={gate} onChange={(e) => setGate(e.currentTarget.checked)} />
+          <span>
+            <b>{t.issueGate}</b>
+            <i>{t.issueGateHint}</i>
+          </span>
+        </label>
+
+        {error !== null && (
+          <ErrorNote
+            code={error}
+            messages={t.err}
+            fallback={t.errFallback}
+            {...(error === 'BILLING_REQUIRED'
+              ? { cta: { label: t.errBillingCta, href: '/pro/signup' } }
+              : {})}
+          />
+        )}
 
         {issued && (
           <div className="pro-issued">
             <p className="pro-no">{issued.no}</p>
-            <Copyable label="링크" text={issued.clientUrl} />
-            <Copyable label="안내문 (영문)" text={issued.shareText} multiline />
-            <p className="pro-note">
-              발송은 직접 하세요. 마켓플레이스 메시지에 붙여넣으면 됩니다 —
-              자동 전송은 계정 정지 사유라 제공하지 않습니다.
-            </p>
+            <Copyable
+              label={t.issuedLink}
+              text={issued.clientUrl}
+              copyLabel={t.copy}
+              onCopied={() => show(t.copied)}
+            />
+            <Copyable
+              label={t.issuedShare}
+              text={issued.shareText}
+              multiline
+              copyLabel={t.copy}
+              onCopied={() => show(t.copied)}
+            />
+            <p className="pro-note">{t.issuedNote}</p>
             <a className="pro-open" href={issued.clientUrl} target="_blank" rel="noreferrer">
-              클라이언트 화면 열어보기 →
+              {t.issuedOpen} →
             </a>
           </div>
         )}
       </section>
 
       <section className="pro-card">
-        <h2>진행 중 ({rows.length})</h2>
-        {rows.length === 0 && <p className="pro-empty">아직 발급한 링크가 없습니다.</p>}
-        <ul className="pro-list">
-          {rows.map((r) => (
-            <li key={r.id}>
-              <button
-                type="button"
-                className="pro-row"
-                onClick={() => {
-                  const next = open === r.token ? null : r.token
-                  setOpen(next)
-                  setDocs(null)
-                  if (next) void deliverables(next).then(setDocs)
-                }}
-              >
-                <span className="pro-row-no">{r.no}</span>
-                <span className="pro-row-label">{r.clientLabel || r.profileSlug}</span>
-                <span className="pro-row-state" data-state={r.state}>
-                  {r.state}
-                </span>
-                <span className="pro-row-prog">
-                  {r.locked} / {r.total}
-                </span>
-                <span className="pro-row-amt">${r.amountUsd.toFixed(0)}</span>
-              </button>
+        <h2>
+          {t.listTitle} <span className="pro-count">{rows.length}</span>
+        </h2>
 
-              {open === r.token && (
-                <div className="pro-detail">
-                  <a className="pro-open" href={`/s/${r.token}`} target="_blank" rel="noreferrer">
-                    클라이언트 화면 →
-                  </a>
-                  {docs === null ? (
-                    <p className="pro-note">사양이 확정되면 사양서와 오퍼 텍스트가 생성됩니다.</p>
-                  ) : (
-                    <>
-                      <Copyable label="사양서 (언어 중립)" text={docs.sheet} multiline mono />
-                      <Copyable label="사양서 (한국어 병기)" text={docs.sheetLocalized} multiline mono />
-                      <Copyable label="마켓플레이스 오퍼 (영문)" text={docs.offer} multiline />
-                    </>
-                  )}
-                </div>
-              )}
-            </li>
-          ))}
-        </ul>
+        {rows.length === 0 ? (
+          <p className="pro-empty">{t.listEmpty}</p>
+        ) : (
+          <ul className="pro-list">
+            {rows.map((r) => (
+              <li key={r.id}>
+                <Link className="pro-row" href={`/pro/s/${r.token}`}>
+                  <span className="pro-row-no">{r.no}</span>
+                  <span className="pro-row-label">{r.clientLabel || r.profileSlug}</span>
+                  <span className="pro-row-state" data-dot={STATE_DOT[r.state] ?? 'open'}>
+                    {r.state}
+                  </span>
+                  <span className="pro-row-prog">
+                    {r.locked} / {r.total}
+                  </span>
+                  <span className="pro-row-amt">${r.amountUsd.toFixed(0)}</span>
+                  {/* 지금 손이 필요한 세션은 한눈에 보여야 한다 */}
+                  {r.awaitingReview && <span className="pro-flag" data-k="review" />}
+                  {r.pendingNegotiations > 0 && <span className="pro-flag" data-k="sent" />}
+                  {r.requestCount > 0 && <span className="pro-flag" data-k="req" />}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
-    </div>
-  )
-}
 
-function Copyable({
-  label,
-  text,
-  multiline,
-  mono,
-}: {
-  readonly label: string
-  readonly text: string
-  readonly multiline?: boolean
-  readonly mono?: boolean
-}) {
-  const [copied, setCopied] = useState(false)
-  return (
-    <div className="pro-copy">
-      <div className="pro-copy-head">
-        <span>{label}</span>
-        <button
-          type="button"
-          onClick={() => {
-            void navigator.clipboard.writeText(text).then(() => {
-              setCopied(true)
-              setTimeout(() => setCopied(false), 1400)
-            })
-          }}
-        >
-          {copied ? '복사됨' : '복사'}
-        </button>
-      </div>
-      {multiline ? (
-        <pre className={mono ? 'pro-pre pro-pre-mono' : 'pro-pre'}>{text}</pre>
-      ) : (
-        <code className="pro-inline">{text}</code>
-      )}
+      {toast}
     </div>
   )
 }

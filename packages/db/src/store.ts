@@ -8,6 +8,7 @@ import type {
   AssetStates,
   CompiledProfile,
   NegotiationProposal,
+  RevisionRequest,
   Side,
   SpecLine,
 } from '@preflight/core'
@@ -92,6 +93,9 @@ interface SessionRow {
   negotiations: NegotiationProposal[] | string
   axis_overrides: Record<string, SpecLine> | string
   revisions_used: number
+  requests: RevisionRequest[] | string
+  review_gate: boolean
+  reviewed_at: Date | string | null
   pnr_passed_at: Date | string | null
   opened_at: Date | string | null
   settled_at: Date | string | null
@@ -118,8 +122,8 @@ export class PgSessionStore implements SessionStore {
       `INSERT INTO session (
          id, no, pro_id, profile_slug, profile_snapshot, client_label, marketplace,
          state, scope, assets, negotiations, axis_overrides, revisions_used,
-         pnr_passed_at, opened_at, settled_at, created_at
-       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
+         requests, review_gate, reviewed_at, pnr_passed_at, opened_at, settled_at, created_at
+       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)
        ON CONFLICT (id) DO UPDATE SET
          state = EXCLUDED.state,
          scope = EXCLUDED.scope,
@@ -127,6 +131,8 @@ export class PgSessionStore implements SessionStore {
          negotiations = EXCLUDED.negotiations,
          axis_overrides = EXCLUDED.axis_overrides,
          revisions_used = EXCLUDED.revisions_used,
+         requests = EXCLUDED.requests,
+         reviewed_at = EXCLUDED.reviewed_at,
          pnr_passed_at = EXCLUDED.pnr_passed_at,
          opened_at = EXCLUDED.opened_at,
          settled_at = EXCLUDED.settled_at`,
@@ -144,6 +150,9 @@ export class PgSessionStore implements SessionStore {
         JSON.stringify(r.negotiations),
         JSON.stringify(r.axisOverrides),
         r.revisionsUsed,
+        JSON.stringify(r.requests),
+        r.reviewGate,
+        r.reviewedAt,
         r.pnrPassedAt,
         r.openedAt,
         r.settledAt,
@@ -224,6 +233,9 @@ export class PgSessionStore implements SessionStore {
       negotiations: json<NegotiationProposal[]>(row.negotiations),
       axisOverrides: json<Record<string, SpecLine>>(row.axis_overrides),
       revisionsUsed: row.revisions_used,
+      requests: json<RevisionRequest[]>(row.requests),
+      reviewGate: row.review_gate === true,
+      reviewedAt: iso(row.reviewed_at),
       pnrPassedAt: iso(row.pnr_passed_at),
       createdAt: iso(row.created_at)!,
       openedAt: iso(row.opened_at),
