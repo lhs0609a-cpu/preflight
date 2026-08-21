@@ -88,5 +88,16 @@
   "pnr.printorder": "Druckauftrag",
   "scope.design": "Design",
   "scope.dieline": "Stanzform",
-  "scope.print": "Druck"
+  "scope.print": "Druck",
+  "block.tone": "Tonalität",
+  "tone.credible": "Seriös",
+  "tone.direct": "Direkt",
+  "tone.warm": "Warm",
+  "block.team": "Team",
+
+  "block.tone": "Tonalität",
+  "tone.credible": "Seriös",
+  "tone.direct": "Direkt",
+  "tone.warm": "Warm",
+  "block.team": "Team"
 }

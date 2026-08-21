@@ -10,7 +10,13 @@
     "listingTemplate": "listing.web.v1"
   },
   "policy": {},
-  "flow": [{ "key": "taste" }, { "key": "structure" }, { "key": "scope" }, { "key": "assets" }],
+  "flow": [
+    { "key": "taste" },
+    { "key": "structure" },
+    { "key": "tone" },
+    { "key": "scope" },
+    { "key": "assets" }
+  ],
   "blocks": [
     {
       "id": "taste",
@@ -94,6 +100,40 @@
             "icon": "circle",
             "measure": "person-led order",
             "wireframe": [["h", 1], ["b", 2], ["s", 3], ["b", 1]]
+          }
+        ]
+      }
+    },
+    {
+      "id": "tone",
+      "type": "PICK_N",
+      "labelKey": "block.tone",
+      "icon": "file",
+      "lock": "soft",
+      "priceImpact": false,
+      "required": false,
+      "config": {
+        "kind": "PICK_N",
+        "style": "sample",
+        "fidelity": "high",
+        "options": [
+          {
+            "labelKey": "tone.credible",
+            "icon": "shield",
+            "sample": "Trusted by teams since 2008",
+            "measure": "formal register"
+          },
+          {
+            "labelKey": "tone.direct",
+            "icon": "arrow-right",
+            "sample": "Get a quote in 24 hours",
+            "measure": "direct register"
+          },
+          {
+            "labelKey": "tone.warm",
+            "icon": "circle",
+            "sample": "Let us build something you love",
+            "measure": "warm register"
           }
         ]
       }

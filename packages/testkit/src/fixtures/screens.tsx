@@ -29,8 +29,11 @@ import {
   NegotiationCompare,
   ScopeAssemble,
   SpecConfirm,
+  PnrConfirm,
   StructurePick,
   TasteCards,
+  TeamCompare,
+  TonePick,
   Waiting,
 } from '@preflight/ui'
 import type { Screen } from '../wordless.ts'
@@ -56,6 +59,24 @@ function screensFor(profile: CompiledProfile): Screen[] {
   const out: Screen[] = [
     html(`${profile.slug}/C-01`, <LinkEntry steps={profile.flow.length} avatarUrl="/a.webp" />),
   ]
+
+  // C-06 은 style 이 sample 인 PICK_N 이다. 슬러그로 찾지 않는다.
+  const tone = profile.blocks.find(
+    (b) => b.config.kind === 'PICK_N' && b.config.style === 'sample',
+  )
+  if (tone && tone.config.kind === 'PICK_N') {
+    out.push(html(`${profile.slug}/C-06`, <TonePick config={tone.config} selected={0} />))
+  }
+
+  // C-12 는 리허설 블록이 있는 유형(gated)에만 있다
+  const rehearsal = profile.blocks.find((b) => b.config.kind === 'REHEARSAL')
+  if (rehearsal && rehearsal.config.kind === 'REHEARSAL') {
+    const n = rehearsal.config.checkpointKeys.length
+    out.push(html(`${profile.slug}/C-12`, <PnrConfirm hoursLeft={36} passed={n} total={n} />))
+    out.push(
+      html(`${profile.slug}/C-12-held`, <PnrConfirm hoursLeft={36} passed={n} total={n} held />),
+    )
+  }
 
   const taste = blockWith(profile, 'PAIRWISE')
   if (taste && taste.config.kind === 'PAIRWISE') {
@@ -105,6 +126,21 @@ function screensFor(profile: CompiledProfile): Screen[] {
       lockedAt: '2026-09-02T00:00:00.000Z',
     })
     out.push(html(`${profile.slug}/C-10`, <Done spec={spec} dict={dict} />))
+
+    // C-09 팀 대조. 축은 실제 프로파일에서 온다
+    out.push(
+      html(
+        `${profile.slug}/C-09`,
+        <TeamCompare
+          members={3}
+          dict={dict}
+          rows={spec.lines.slice(0, 4).map((l, i) => ({
+            axisKey: l.key,
+            picks: [i % 2 === 0 ? 'a' : 'b', 'a', i > 1 ? 'b' : 'a'] as ('a' | 'b')[],
+          }))}
+        />,
+      ),
+    )
     // 04 §5.2 검토 대기. 화면이 없으면 게이지만 남은 빈 페이지가 뜬다
     out.push(
       html(

@@ -97,5 +97,11 @@
   "pnr.printorder": "प्रिंट ऑर्डर",
   "scope.design": "डिज़ाइन",
   "scope.dieline": "डाईलाइन",
-  "scope.print": "छपाई"
+  "scope.print": "छपाई",
+
+  "block.tone": "लहजा",
+  "tone.credible": "भरोसेमंद",
+  "tone.direct": "सीधा",
+  "tone.warm": "आत्मीय",
+  "block.team": "टीम"
 }

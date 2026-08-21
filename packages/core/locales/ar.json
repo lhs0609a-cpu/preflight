@@ -88,5 +88,16 @@
   "pnr.printorder": "أمر الطباعة",
   "scope.design": "تصميم",
   "scope.dieline": "قالب قص",
-  "scope.print": "طباعة"
+  "scope.print": "طباعة",
+  "block.tone": "النبرة",
+  "tone.credible": "موثوق",
+  "tone.direct": "مباشر",
+  "tone.warm": "دافئ",
+  "block.team": "الفريق",
+
+  "block.tone": "النبرة",
+  "tone.credible": "موثوق",
+  "tone.direct": "مباشر",
+  "tone.warm": "دافئ",
+  "block.team": "الفريق"
 }

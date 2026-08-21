@@ -88,5 +88,16 @@
   "pnr.printorder": "下印",
   "scope.design": "设计",
   "scope.dieline": "刀模",
-  "scope.print": "印刷"
+  "scope.print": "印刷",
+  "block.tone": "语气",
+  "tone.credible": "可信",
+  "tone.direct": "直接",
+  "tone.warm": "温暖",
+  "block.team": "团队",
+
+  "block.tone": "语气",
+  "tone.credible": "可信",
+  "tone.direct": "直接",
+  "tone.warm": "温暖",
+  "block.team": "团队"
 }

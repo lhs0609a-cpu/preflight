@@ -97,5 +97,11 @@
   "pnr.printorder": "Ordem impressão",
   "scope.design": "Design",
   "scope.dieline": "Faca",
-  "scope.print": "Impressão"
+  "scope.print": "Impressão",
+
+  "block.tone": "Tom",
+  "tone.credible": "Confiável",
+  "tone.direct": "Direto",
+  "tone.warm": "Acolhedor",
+  "block.team": "Equipe"
 }

@@ -15,12 +15,30 @@ import {
   type ProStore,
   type SessionStore,
 } from '@preflight/session'
-import { renderOfferText, renderSheet, type Side } from '@preflight/core'
+import { renderOfferText, renderSheet, type CompiledProfile, type Side } from '@preflight/core'
 import { compileAllProfiles } from './profiles.ts'
 import { STORE_ADAPTERS, type StoreBundle } from './stores.ts'
 
 const profiles = compileAllProfiles()
 const web = profiles.find((p) => p.slug === 'web')!
+
+/**
+ * 잠금 게이지의 분모. 서비스의 totalLineCount 와 같은 규칙이다 —
+ * PAIRWISE 는 축 수, PICK_N 은 1, 범위 체크리스트는 1.
+ *
+ * 숫자를 박아두면 블록이 하나 늘 때마다 이 단언이 깨지고, 고치는 순간
+ * 아무것도 지키지 않게 된다. 실제로 톤(C-06) 블록을 넣었을 때 그렇게 깨졌다.
+ */
+function expectedLines(profile: CompiledProfile): number {
+  let n = 0
+  for (const b of profile.blocks) {
+    const c = b.config
+    if (c.kind === 'PAIRWISE') n += c.axes.length
+    else if (c.kind === 'PICK_N') n += 1
+    else if (c.kind === 'CHECKLIST' && c.mode === 'scope') n += 1
+  }
+  return n
+}
 const photo = profiles.find((p) => p.slug === 'photo')!
 
 const PRO: Pro = {
@@ -101,14 +119,16 @@ describe.each(STORE_ADAPTERS)('저장소: $name', ({ make }) => {
   })
 
   describe('클라이언트 전 구간 — web', () => {
-    it('열람 → 카드 → 구조 → 범위 → 확정', async () => {
+    it('열람 → 카드 → 구조 → 톤 → 범위 → 확정', async () => {
       const s = svc()
       const { token } = await s.issue({ proId: PRO.id, profile: web })
 
       let view = await s.open(token)
       expect(view.cursor).toBe('taste')
       expect(view.locked).toBe(0)
-      expect(view.total).toBe(8) // 축 6 + 구조 1 + 범위 1
+      // 프로파일에서 센다. 숫자를 박아두면 블록이 하나 늘 때마다 이 줄이
+      // 깨지고, 고치는 순간 이 단언은 아무것도 지키지 않게 된다.
+      expect(view.total).toBe(expectedLines(web))
 
       for (let i = 0; i < 6; i++) {
         expect(await s.pair(token, 'taste'), `cursor ${i}`).not.toBeNull()
@@ -125,6 +145,12 @@ describe.each(STORE_ADAPTERS)('저장소: $name', ({ make }) => {
       view = await s.settleBlock(token, 'structure')
       expect(view.locked).toBe(7)
 
+      // C-06 톤. style 이 sample 인 PICK_N 이며, 여기만 영문이 노출된다
+      expect(view.cursor).toBe('tone')
+      await s.pick(token, 'tone', 0)
+      view = await s.settleBlock(token, 'tone')
+      expect(view.locked).toBe(8)
+
       // 06 C-07 의 숫자
       expect(view.cursor).toBe('scope')
       expect(view.amountUsd).toBe(380)
@@ -137,7 +163,7 @@ describe.each(STORE_ADAPTERS)('저장소: $name', ({ make }) => {
       const { spec, payload } = await s.settle(token)
       expect(spec.no).toMatch(/^PF-2609-\d{4}$/u)
       expect(spec.amountUsd).toBe(440)
-      expect(spec.lines).toHaveLength(8)
+      expect(spec.lines).toHaveLength(expectedLines(web))
       expect(spec.lines[0]!.measure).toBe('padding 32px')
       expect(sha(payload)).toHaveLength(64)
     })

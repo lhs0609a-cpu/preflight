@@ -88,5 +88,16 @@
   "pnr.printorder": "Pesan cetak",
   "scope.design": "Desain",
   "scope.dieline": "Pisau potong",
-  "scope.print": "Pencetakan"
+  "scope.print": "Pencetakan",
+  "block.tone": "Nada",
+  "tone.credible": "Tepercaya",
+  "tone.direct": "Langsung",
+  "tone.warm": "Hangat",
+  "block.team": "Tim",
+
+  "block.tone": "Nada",
+  "tone.credible": "Tepercaya",
+  "tone.direct": "Langsung",
+  "tone.warm": "Hangat",
+  "block.team": "Tim"
 }
