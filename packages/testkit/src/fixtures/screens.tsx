@@ -138,6 +138,7 @@ function screensFor(profile: CompiledProfile): Screen[] {
             axisKey: l.key,
             picks: [i % 2 === 0 ? 'a' : 'b', 'a', i > 1 ? 'b' : 'a'] as ('a' | 'b')[],
           }))}
+          canInvite
         />,
       ),
     )

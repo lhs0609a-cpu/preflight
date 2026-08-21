@@ -35,6 +35,23 @@ export interface Pro {
   readonly billingVerified: boolean
 }
 
+/**
+ * C-09 팀원 — FR-7.
+ *
+ * 이름이 없다. 화면은 A · B · C 순서만 보여준다 — 이름을 넣으면 로케일이
+ * 필요해지고, 무엇보다 "누가 틀렸나" 를 가리키는 화면이 된다. 여기서 볼 것은
+ * 사람이 아니라 **어느 축이 갈렸는가** 하나다 (06 §C-09).
+ */
+export interface TeamMember {
+  readonly id: string
+  /** 이 팀원 전용 링크. 주 클라이언트 토큰과 같은 강도다 (NFR-5.1) */
+  readonly token: string
+  /** 화면의 A · B · C */
+  readonly seq: number
+  /** blockId → 축별 선택. 주 클라이언트의 choices 와 같은 모양 */
+  choices: Record<string, Side[]>
+}
+
 export interface SessionRecord {
   readonly id: string
   readonly no: string
@@ -58,6 +75,11 @@ export interface SessionRecord {
   revisionsUsed: number
   /** FR-9 — 제출된 수정 요청. 판정만 하고 버리면 프리랜서가 볼 것이 없다 */
   requests: RevisionRequest[]
+  /**
+   * FR-7 — 팀원별 선택. 최종 사양은 **주 클라이언트의 것**으로 간다.
+   * 대조는 정보 제공이다 — 시스템은 어느 쪽도 막지 않는다 (04 §5.3).
+   */
+  members: TeamMember[]
   /** 04 §3 — 되돌림 한계점 통과 시각 */
   pnrPassedAt: string | null
   /**
@@ -108,6 +130,8 @@ export interface SessionStore {
    * period 는 'YYYYMM' — 번호가 PF-YYMM-NNNN 이라 달마다 1부터 다시 센다.
    */
   nextSeq(period: string): Promise<number>
+  /** FR-7 — 팀원 토큰으로 세션을 찾는다. 없으면 undefined */
+  byMemberToken(token: string): Promise<{ record: SessionRecord; memberId: string } | undefined>
   byToken(token: string): Promise<SessionRecord | undefined>
   byId(id: string): Promise<SessionRecord | undefined>
   listByPro(proId: string): Promise<SessionRecord[]>
@@ -140,6 +164,16 @@ export class InMemorySessionStore implements SessionStore {
     const n = (this.#seq.get(period) ?? 0) + 1
     this.#seq.set(period, n)
     return n
+  }
+
+  async byMemberToken(
+    token: string,
+  ): Promise<{ record: SessionRecord; memberId: string } | undefined> {
+    for (const r of this.#byId.values()) {
+      const m = r.members.find((x) => x.token === token)
+      if (m !== undefined) return { record: r, memberId: m.id }
+    }
+    return undefined
   }
 
   async put(record: SessionRecord): Promise<void> {

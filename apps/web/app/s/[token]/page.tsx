@@ -7,8 +7,9 @@
 import { notFound } from 'next/navigation'
 import type { BlockConfig } from '@preflight/core'
 import { runtime } from '../../_lib/runtime.ts'
-import { readState, spec } from '../../_lib/actions.ts'
+import { memberState, readState, spec } from '../../_lib/actions.ts'
 import { Flow } from './Flow.tsx'
+import { TeamFlow } from './TeamFlow.tsx'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,7 +17,19 @@ export default async function SessionPage({ params }: { params: Promise<{ token:
   const { token } = await params
   const rt = await runtime()
   const record = await rt.service.store.byToken(token)
-  if (!record) notFound()
+
+  /*
+   * 같은 경로가 두 사람을 받는다. 팀원에게 별도 주소를 주면 링크가 두 종류가
+   * 되고, 그걸 구분해 보내는 일이 클라이언트 몫이 된다 — 토큰이 누구인지는
+   * 서버가 안다.
+   */
+  if (!record) {
+    const member = await memberState(token)
+    if (member === null) notFound()
+    const team = (await rt.service.memberByToken(token))!.record
+    const pairwise = team.profile.blocks.find((b) => b.config.kind === 'PAIRWISE')!
+    return <TeamFlow token={token} initial={member} config={pairwise.config} />
+  }
 
   const initial = await readState(token)
   // 확정된 링크를 다시 열면 곧바로 C-10 이 떠야 한다. 클라이언트에서 받아오면

@@ -41,6 +41,7 @@ import {
   SpecConfirm,
   StructurePick,
   TasteCards,
+  TeamCompare,
   TonePick,
   Waiting,
 } from '@preflight/ui'
@@ -48,9 +49,11 @@ import {
   answer,
   confirmPnr,
   feedbackAxes,
+  inviteMember,
   negotiationDeck,
   openSession,
   pick,
+  readState,
   respondNegotiation,
   setAsset,
   setScope,
@@ -95,6 +98,8 @@ export function Flow({ token, initial, initialSpec, steps, dict, configs, avatar
   const [feedbackOpen, setFeedbackOpen] = useState(false)
   // C-12 보류. 아무것도 기록하지 않으므로 화면 로컬 상태다
   const [held, setHeld] = useState(false)
+  // C-09 초대 링크를 방금 복사했다. 화면 로컬 상태다
+  const [invited, setInvited] = useState(false)
   const [pending, start] = useTransition()
   const touch = useRef<number | null>(null)
 
@@ -385,6 +390,45 @@ export function Flow({ token, initial, initialSpec, steps, dict, configs, avatar
             }}
           />
           <span />
+        </>
+      )}
+
+      {/*
+        C-09 팀 대조. 최종 사양은 **주 클라이언트**의 선택으로 간다 —
+        대조는 정보 제공이고 시스템은 어느 쪽도 막지 않는다 (04 §5.3).
+      */}
+      {config?.kind === 'ROSTER' && cursor !== null && (
+        <>
+          <TeamCompare
+            rows={state.teamRows}
+            dict={dict}
+            members={state.teamMembers}
+            canInvite={state.teamCanInvite}
+            copied={invited}
+            busy={pending}
+            onInvite={() => {
+              start(() => {
+                void inviteMember(token).then((r) => {
+                  if (!r.ok) return
+                  // 링크만 만든다. 보내지 않는다 (09 §2.1)
+                  void navigator.clipboard.writeText(r.value).then(() => {
+                    setInvited(true)
+                    setTimeout(() => setInvited(false), 1600)
+                  })
+                  void readState(token).then(commit)
+                })
+              })
+            }}
+          />
+          <ConfirmBar
+            disabled={pending}
+            label="Continue with these choices"
+            onClick={() => {
+              start(() => {
+                void settleBlock(token, cursor).then(commit)
+              })
+            }}
+          />
         </>
       )}
 

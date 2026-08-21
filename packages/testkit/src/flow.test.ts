@@ -119,7 +119,7 @@ describe.each(STORE_ADAPTERS)('저장소: $name', ({ make }) => {
   })
 
   describe('클라이언트 전 구간 — web', () => {
-    it('열람 → 카드 → 구조 → 톤 → 범위 → 확정', async () => {
+    it('열람 → 카드 → 팀 → 구조 → 톤 → 범위 → 확정', async () => {
       const s = svc()
       const { token } = await s.issue({ proId: PRO.id, profile: web })
 
@@ -138,6 +138,12 @@ describe.each(STORE_ADAPTERS)('저장소: $name', ({ make }) => {
       }
       expect(await s.pair(token, 'taste')).toBeNull()
       view = await s.settleBlock(token, 'taste')
+      expect(view.locked).toBe(6)
+
+      // C-09 팀 대조. 선택 블록이라 팀원을 부르지 않고 그대로 넘어갈 수 있고,
+      // 줄 수에도 영향이 없다 — 최종 사양은 주 클라이언트의 선택이다 (04 §5.3)
+      expect(view.cursor).toBe('team')
+      view = await s.settleBlock(token, 'team')
       expect(view.locked).toBe(6)
 
       expect(view.cursor).toBe('structure')
