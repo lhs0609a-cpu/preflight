@@ -24,6 +24,9 @@
  *    이건 마케팅 문구가 아니라 사실이라 강하다.
  */
 import { LOCALES, type Locale } from '@preflight/core'
+// 로케일이 20종이라 한 파일에 다 두면 읽을 수가 없다. 지역별로 나눈다.
+import * as A from './landing-copy.asia.ts'
+import * as E from './landing-copy.euro.ts'
 
 export interface Landing {
   navHow: string
@@ -548,6 +551,18 @@ const TABLE: Readonly<Record<Locale, Landing>> = {
   hi,
   tl,
   uk,
+  ja: A.ja,
+  'zh-CN': A.zhCN,
+  ar: A.ar,
+  ur: A.ur,
+  bn: A.bn,
+  th: A.th,
+  id: E.id,
+  tr: E.tr,
+  ru: E.ru,
+  pl: E.pl,
+  de: E.de,
+  fr: E.fr,
 }
 
 export function landingFor(locale: string): Landing {

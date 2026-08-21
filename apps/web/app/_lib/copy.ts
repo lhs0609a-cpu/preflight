@@ -9,10 +9,14 @@
  *
  * measure 는 여기 넣지 않는다 — 절대 번역하지 않는다 (02 §3 · 06 §4).
  *
- * ⚠ 비영어 6종(hi · tl · vi · uk · es · pt-BR)은 **원어민 검수 전**이다.
- * 라벨 번들과 같은 상태이며 07 §5.3 의 5개국 테스트 전에 검수해야 한다.
+ * ⚠ 비영어 19종은 **원어민 검수 전**이다. 라벨 번들과 같은 상태이며 07 §5.3 의
+ * 5개국 테스트 전에 검수해야 한다. 영어로 폴백된 항목이 하나도 없다는 것은
+ * `pnpm copy:check` 가 기계로 본다 — 어감은 사람이 봐야 한다.
  */
 import { LOCALES, type Locale } from '@preflight/core'
+// 로케일이 20종이라 한 파일에 다 두면 읽을 수가 없다. 지역별로 나눈다.
+import * as A from './copy.asia.ts'
+import * as E from './copy.euro.ts'
 
 export interface Copy {
   tagline: string
@@ -312,6 +316,28 @@ const es: Copy = {
   billingNoCharge: 'No se cobra nada ahora. Solo sirve para cobrar la comisión cuando cierres un trato.',
   billingDone: 'Registrado — ya puedes crear enlaces',
   toConsole: 'Ir a la consola',
+  err: {
+    BILLING_REQUIRED: 'Registra un método de pago antes de crear enlaces.',
+    PRO_SUSPENDED: 'Esta cuenta está suspendida.',
+    UNAUTHORIZED: 'Vuelve a iniciar sesión.',
+    PROFILE_NOT_FOUND: 'Ese tipo de trabajo ya no está disponible.',
+    EMAIL_TAKEN: 'Ese correo ya está registrado.',
+    EMAIL_INVALID: 'Revisa la dirección de correo.',
+    NAME_REQUIRED: 'Escribe un nombre visible.',
+    LOCALE_UNSUPPORTED: 'Ese idioma aún no está disponible.',
+    TIMEZONE_INVALID: 'Revisa la zona horaria.',
+    BILLING_KEY_REQUIRED: 'Escribe la clave de facturación.',
+    PG_PROVIDER_REQUIRED: 'Elige una pasarela de pago.',
+    LOOKS_LIKE_CARD_NUMBER: 'Eso parece un número de tarjeta. Pega la clave de facturación.',
+    TOO_MANY_PROPOSALS: 'Máximo 3 cambios a la vez.',
+    DUPLICATE_AXIS_PROPOSAL: 'Un cambio por aspecto.',
+    REVIEW_GATE_OFF: 'Este enlace se fija sin revisión.',
+    ALREADY_SETTLED: 'La ficha ya está fijada.',
+    NEGOTIATION_PENDING: 'Esperando que el cliente responda a tu propuesta.',
+    GATE_LOCKED: 'El cliente aún no ha terminado.',
+  },
+  errFallback: 'Algo salió mal. Inténtalo de nuevo.',
+  errBillingCta: 'Registrar ahora',
 }
 
 const ptBR: Copy = {
@@ -370,6 +396,28 @@ const ptBR: Copy = {
   billingNoCharge: 'Nada é cobrado agora. Serve só para cobrar a taxa depois que um trabalho fechar.',
   billingDone: 'Registrado — agora você pode criar links',
   toConsole: 'Ir para o console',
+  err: {
+    BILLING_REQUIRED: 'Cadastre uma forma de pagamento antes de criar links.',
+    PRO_SUSPENDED: 'Esta conta está suspensa.',
+    UNAUTHORIZED: 'Entre novamente.',
+    PROFILE_NOT_FOUND: 'Esse tipo de trabalho não está mais disponível.',
+    EMAIL_TAKEN: 'Esse e-mail já está cadastrado.',
+    EMAIL_INVALID: 'Confira o endereço de e-mail.',
+    NAME_REQUIRED: 'Informe um nome exibido.',
+    LOCALE_UNSUPPORTED: 'Esse idioma ainda não é suportado.',
+    TIMEZONE_INVALID: 'Confira o fuso horário.',
+    BILLING_KEY_REQUIRED: 'Informe a chave de cobrança.',
+    PG_PROVIDER_REQUIRED: 'Escolha um provedor de pagamento.',
+    LOOKS_LIKE_CARD_NUMBER: 'Isso parece um número de cartão. Cole a chave de cobrança.',
+    TOO_MANY_PROPOSALS: 'No máximo 3 alterações por vez.',
+    DUPLICATE_AXIS_PROPOSAL: 'Uma alteração por item.',
+    REVIEW_GATE_OFF: 'Este link fecha sem revisão.',
+    ALREADY_SETTLED: 'A ficha já está fechada.',
+    NEGOTIATION_PENDING: 'Aguardando o cliente responder à sua proposta.',
+    GATE_LOCKED: 'O cliente ainda não terminou.',
+  },
+  errFallback: 'Algo deu errado. Tente de novo.',
+  errBillingCta: 'Cadastrar agora',
 }
 
 const vi: Copy = {
@@ -428,6 +476,28 @@ const vi: Copy = {
   billingNoCharge: 'Bây giờ chưa trừ tiền. Đây chỉ để thu phí sau khi bạn chốt được việc.',
   billingDone: 'Đã đăng ký — bạn có thể tạo liên kết',
   toConsole: 'Vào bảng điều khiển',
+  err: {
+    BILLING_REQUIRED: 'Hãy thêm phương thức thanh toán trước khi tạo liên kết.',
+    PRO_SUSPENDED: 'Tài khoản này đã bị đình chỉ.',
+    UNAUTHORIZED: 'Vui lòng đăng nhập lại.',
+    PROFILE_NOT_FOUND: 'Loại công việc đó không còn nữa.',
+    EMAIL_TAKEN: 'Email này đã được đăng ký.',
+    EMAIL_INVALID: 'Hãy kiểm tra địa chỉ email.',
+    NAME_REQUIRED: 'Hãy nhập tên hiển thị.',
+    LOCALE_UNSUPPORTED: 'Ngôn ngữ này chưa được hỗ trợ.',
+    TIMEZONE_INVALID: 'Hãy kiểm tra múi giờ.',
+    BILLING_KEY_REQUIRED: 'Hãy nhập mã thanh toán.',
+    PG_PROVIDER_REQUIRED: 'Hãy chọn cổng thanh toán.',
+    LOOKS_LIKE_CARD_NUMBER: 'Cái này giống số thẻ. Hãy dán mã thanh toán thay vào đó.',
+    TOO_MANY_PROPOSALS: 'Tối đa 3 thay đổi mỗi lần.',
+    DUPLICATE_AXIS_PROPOSAL: 'Mỗi mục chỉ một thay đổi.',
+    REVIEW_GATE_OFF: 'Liên kết này chốt mà không cần xem lại.',
+    ALREADY_SETTLED: 'Đặc tả đã được chốt.',
+    NEGOTIATION_PENDING: 'Đang chờ khách trả lời đề xuất của bạn.',
+    GATE_LOCKED: 'Khách vẫn chưa hoàn tất.',
+  },
+  errFallback: 'Có gì đó không ổn. Hãy thử lại.',
+  errBillingCta: 'Thêm ngay',
 }
 
 const hi: Copy = {
@@ -486,6 +556,28 @@ const hi: Copy = {
   billingNoCharge: 'अभी कोई शुल्क नहीं कटता। यह सिर्फ़ सौदा तय होने के बाद शुल्क लेने के लिए है।',
   billingDone: 'दर्ज हुआ — अब आप लिंक बना सकते हैं',
   toConsole: 'कंसोल पर जाएँ',
+  err: {
+    BILLING_REQUIRED: 'लिंक बनाने से पहले भुगतान का साधन दर्ज करें।',
+    PRO_SUSPENDED: 'यह खाता निलंबित है।',
+    UNAUTHORIZED: 'फिर से साइन इन करें।',
+    PROFILE_NOT_FOUND: 'वह काम का प्रकार अब उपलब्ध नहीं है।',
+    EMAIL_TAKEN: 'यह ईमेल पहले से दर्ज है।',
+    EMAIL_INVALID: 'ईमेल पता जाँच लें।',
+    NAME_REQUIRED: 'दिखने वाला नाम भरें।',
+    LOCALE_UNSUPPORTED: 'यह भाषा अभी समर्थित नहीं है।',
+    TIMEZONE_INVALID: 'समय क्षेत्र जाँच लें।',
+    BILLING_KEY_REQUIRED: 'बिलिंग कुंजी भरें।',
+    PG_PROVIDER_REQUIRED: 'भुगतान प्रदाता चुनें।',
+    LOOKS_LIKE_CARD_NUMBER: 'यह कार्ड नंबर लगता है। इसके बजाय बिलिंग कुंजी चिपकाएँ।',
+    TOO_MANY_PROPOSALS: 'एक बार में अधिकतम 3 बदलाव।',
+    DUPLICATE_AXIS_PROPOSAL: 'हर पहलू पर एक बदलाव।',
+    REVIEW_GATE_OFF: 'यह लिंक बिना समीक्षा के तय हो जाता है।',
+    ALREADY_SETTLED: 'विवरण पहले ही तय हो चुका है।',
+    NEGOTIATION_PENDING: 'आपके प्रस्ताव पर क्लाइंट के उत्तर की प्रतीक्षा है।',
+    GATE_LOCKED: 'क्लाइंट ने अभी पूरा नहीं किया।',
+  },
+  errFallback: 'कुछ गड़बड़ हो गई। फिर कोशिश करें।',
+  errBillingCta: 'अभी दर्ज करें',
 }
 
 const tl: Copy = {
@@ -544,6 +636,28 @@ const tl: Copy = {
   billingNoCharge: 'Walang sinisingil ngayon. Para lang ito sa bayad kapag may natapos nang deal.',
   billingDone: 'Nakarehistro — puwede ka nang gumawa ng link',
   toConsole: 'Pumunta sa console',
+  err: {
+    BILLING_REQUIRED: 'Magrehistro ng paraan ng bayad bago gumawa ng link.',
+    PRO_SUSPENDED: 'Suspendido ang account na ito.',
+    UNAUTHORIZED: 'Mag-sign in ulit.',
+    PROFILE_NOT_FOUND: 'Wala na ang uri ng trabahong iyon.',
+    EMAIL_TAKEN: 'Nakarehistro na ang email na iyon.',
+    EMAIL_INVALID: 'Suriin ang email address.',
+    NAME_REQUIRED: 'Maglagay ng pangalang ipapakita.',
+    LOCALE_UNSUPPORTED: 'Hindi pa suportado ang wikang iyon.',
+    TIMEZONE_INVALID: 'Suriin ang time zone.',
+    BILLING_KEY_REQUIRED: 'Ilagay ang billing key.',
+    PG_PROVIDER_REQUIRED: 'Pumili ng payment provider.',
+    LOOKS_LIKE_CARD_NUMBER: 'Mukhang numero ng card iyan. Idikit ang billing key sa halip.',
+    TOO_MANY_PROPOSALS: 'Hanggang 3 pagbabago sa isang pagkakataon.',
+    DUPLICATE_AXIS_PROPOSAL: 'Isang pagbabago kada bahagi.',
+    REVIEW_GATE_OFF: 'Nagsasara ang link na ito nang walang pagsusuri.',
+    ALREADY_SETTLED: 'Sarado na ang spec.',
+    NEGOTIATION_PENDING: 'Hinihintay ang sagot ng kliyente sa panukala mo.',
+    GATE_LOCKED: 'Hindi pa tapos ang kliyente.',
+  },
+  errFallback: 'May nagkamali. Subukan ulit.',
+  errBillingCta: 'Magrehistro na',
 }
 
 const uk: Copy = {
@@ -602,6 +716,28 @@ const uk: Copy = {
   billingNoCharge: 'Зараз нічого не списується. Це лише щоб стягнути комісію після укладеної угоди.',
   billingDone: 'Зареєстровано — тепер можна створювати посилання',
   toConsole: 'До консолі',
+  err: {
+    BILLING_REQUIRED: 'Додайте спосіб оплати, перш ніж створювати посилання.',
+    PRO_SUSPENDED: 'Цей акаунт заблоковано.',
+    UNAUTHORIZED: 'Увійдіть ще раз.',
+    PROFILE_NOT_FOUND: 'Цей тип роботи більше недоступний.',
+    EMAIL_TAKEN: 'Ця пошта вже зареєстрована.',
+    EMAIL_INVALID: 'Перевірте адресу пошти.',
+    NAME_REQUIRED: 'Введіть видиме ім’я.',
+    LOCALE_UNSUPPORTED: 'Ця мова поки не підтримується.',
+    TIMEZONE_INVALID: 'Перевірте часовий пояс.',
+    BILLING_KEY_REQUIRED: 'Введіть ключ оплати.',
+    PG_PROVIDER_REQUIRED: 'Оберіть платіжного провайдера.',
+    LOOKS_LIKE_CARD_NUMBER: 'Схоже на номер картки. Вставте натомість ключ оплати.',
+    TOO_MANY_PROPOSALS: 'Не більше 3 змін за раз.',
+    DUPLICATE_AXIS_PROPOSAL: 'По одній зміні на аспект.',
+    REVIEW_GATE_OFF: 'Це посилання фіксується без перевірки.',
+    ALREADY_SETTLED: 'Специфікацію вже зафіксовано.',
+    NEGOTIATION_PENDING: 'Очікуємо відповідь клієнта на вашу пропозицію.',
+    GATE_LOCKED: 'Клієнт ще не завершив.',
+  },
+  errFallback: 'Щось пішло не так. Спробуйте ще раз.',
+  errBillingCta: 'Додати зараз',
 }
 
 const TABLE: Readonly<Record<Locale, Copy>> = {
@@ -613,6 +749,18 @@ const TABLE: Readonly<Record<Locale, Copy>> = {
   hi,
   tl,
   uk,
+  ja: A.ja,
+  'zh-CN': A.zhCN,
+  ar: A.ar,
+  ur: A.ur,
+  bn: A.bn,
+  th: A.th,
+  id: E.id,
+  tr: E.tr,
+  ru: E.ru,
+  pl: E.pl,
+  de: E.de,
+  fr: E.fr,
 }
 
 export function copyFor(locale: string): Copy {

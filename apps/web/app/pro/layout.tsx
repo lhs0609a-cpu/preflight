@@ -6,8 +6,15 @@
  * 선택을 영어 규칙으로 한다. 클라이언트 화면은 무언어라 루트의 en 이 맞다.
  */
 import type { ReactNode } from 'react'
+import { dirOf } from '@preflight/core'
 import { proLocale } from '../_lib/actions.ts'
 
 export default async function ProLayout({ children }: { children: ReactNode }) {
-  return <div lang={await proLocale()}>{children}</div>
+  const locale = await proLocale()
+  // dir 도 여기서 정한다. ar · ur 은 글이 오른쪽에서 왼쪽으로 흐른다.
+  return (
+    <div lang={locale} dir={dirOf(locale)}>
+      {children}
+    </div>
+  )
 }
