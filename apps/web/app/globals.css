@@ -2657,3 +2657,21 @@ ul {
 .pf-primary-stop {
   background: var(--stop);
 }
+
+/* C-09 팀원 초대. 링크를 만들어 클립보드에 넣기만 한다 — 보내지 않는다 */
+.pf-invite {
+  min-inline-size: 48px;
+  min-block-size: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-full);
+  border: 1px dashed var(--mute);
+  color: var(--ink-2);
+  transition:
+    border-color var(--dur) var(--ease),
+    color var(--dur) var(--ease);
+}
+.pf-invite:hover {
+  border-color: var(--lock);
+  color: var(--lock);
+}

@@ -208,6 +208,7 @@ export class SessionService {
       axisOverrides: {},
       revisionsUsed: 0,
       requests: [],
+      members: [],
       pnrPassedAt: null,
       reviewGate: input.reviewGate ?? false,
       reviewedAt: null,
@@ -423,6 +424,67 @@ export class SessionService {
     if (r.state === 'OPENED') r.state = transition(r.state, 'IN_PROGRESS')
     await this.#store.put(r)
     return this.#viewOf(r)
+  }
+
+  // ── 팀 대조 (C-09 · FR-7) ────────────────────────────────────────────
+
+  /**
+   * 팀원 자리를 하나 연다. 링크만 만들고 **보내지 않는다** (09 §2.1).
+   *
+   * 이름을 받지 않는다. 화면은 A · B · C 순서만 보여주며, 이름을 넣는 순간
+   * 로케일이 필요해지고 "누가 틀렸나" 를 가리키는 화면이 된다 (06 §C-09).
+   */
+  async addMember(token: string): Promise<{ id: string; url: string }> {
+    const r = await this.#require(token)
+    const roster = r.profile.blocks.find((b) => b.config.kind === 'ROSTER')
+    invariant(roster !== undefined, 'NO_ROSTER_BLOCK', r.no)
+    const config = roster.config
+    invariant(config.kind === 'ROSTER', 'NO_ROSTER_BLOCK', r.no)
+    invariant(r.settledAt === null, 'ALREADY_SETTLED', r.no)
+    // 주 클라이언트가 한 자리를 차지한다. 나머지가 초대 가능한 수다
+    invariant(r.members.length < config.maxMembers - 1, 'ROSTER_FULL', String(r.members.length))
+
+    const member = {
+      id: this.#ids.id(),
+      token: this.#ids.token(),
+      seq: r.members.length + 2, // A 는 주 클라이언트
+      choices: {},
+    }
+    r.members = [...r.members, member]
+    await this.#store.put(r)
+    return { id: member.id, url: `${this.#baseUrl}/s/${member.token}` }
+  }
+
+  /** 팀원 토큰이면 그 팀원을, 아니면 undefined */
+  async memberByToken(
+    token: string,
+  ): Promise<{ record: SessionRecord; memberId: string } | undefined> {
+    return this.#store.byMemberToken(token)
+  }
+
+  /**
+   * 팀원의 카드 응답. 주 클라이언트와 **같은 축**을 같은 순서로 본다 —
+   * 그래야 대조가 성립한다.
+   */
+  async memberAnswer(memberToken: string, blockId: string, side: Side): Promise<AnswerResult> {
+    const found = await this.#store.byMemberToken(memberToken)
+    invariant(found !== undefined, 'UNAUTHORIZED', memberToken.slice(0, 8))
+    const { record: r, memberId } = found
+    const config = this.#config(r, blockId)
+    const member = r.members.find((m) => m.id === memberId)!
+
+    const choices = [...(member.choices[blockId] ?? []), side]
+    const { total, done } = progressOf(config, choices.length)
+    invariant(choices.length <= total, 'CURSOR_OUT_OF_RANGE', String(choices.length))
+    member.choices = { ...member.choices, [blockId]: choices }
+    await this.#store.put(r)
+
+    return {
+      cursor: choices.length,
+      total,
+      done,
+      nextPair: done ? null : serializedPairAt(config, choices.length),
+    }
   }
 
   // ── 조율 (05 §8 · C-04) ──────────────────────────────────────────────

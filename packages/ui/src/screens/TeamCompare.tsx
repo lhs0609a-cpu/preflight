@@ -32,6 +32,13 @@ export interface TeamCompareProps {
   readonly dict: Readonly<Record<string, string>>
   /** 팀원 수. 열 개수를 정한다 */
   readonly members: number
+  /** 아직 초대할 수 있는 자리가 남았는가 */
+  readonly canInvite?: boolean
+  /** 링크를 만들고 클립보드에 넣는다. **보내지 않는다** (09 §2.1) */
+  readonly onInvite?: () => void
+  /** 방금 복사됐다 */
+  readonly copied?: boolean
+  readonly busy?: boolean
 }
 
 /** 전원이 같은 쪽을 골랐고 빈 칸이 없을 때만 합의다 */
@@ -41,7 +48,15 @@ function agreed(picks: readonly (Side | null)[]): boolean {
   return picks.every((p) => p === first)
 }
 
-export function TeamCompare({ rows, dict, members }: TeamCompareProps): ReactNode {
+export function TeamCompare({
+  rows,
+  dict,
+  members,
+  canInvite = false,
+  onInvite,
+  copied = false,
+  busy = false,
+}: TeamCompareProps): ReactNode {
   const split = rows.filter((r) => !agreed(r.picks)).length
 
   return (
@@ -87,6 +102,23 @@ export function TeamCompare({ rows, dict, members }: TeamCompareProps): ReactNod
           })}
         </ul>
       </div>
+
+      {/*
+        초대. 링크를 만들어 클립보드에 넣기만 한다 — 보내지 않는다(09 §2.1).
+        URL 을 글자로 띄우지 않는 이유는 무언어다. 복사 아이콘과 체크로 충분하고,
+        주소를 보여준다고 고객이 더 잘 보내지도 않는다.
+      */}
+      {canInvite && (
+        <button
+          type="button"
+          className="pf-invite"
+          aria-label="Copy a link for a teammate"
+          disabled={busy}
+          onClick={onInvite}
+        >
+          <Icon name={copied ? 'check' : 'plus'} size={20} />
+        </button>
+      )}
 
       {/* 개수가 결론이다. 0 이면 그대로 넘어가도 된다는 뜻 */}
       <footer className="pf-totals" aria-live="polite" aria-label="How many aspects the team is split on">

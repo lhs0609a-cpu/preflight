@@ -12,7 +12,7 @@ import type {
   Side,
   SpecLine,
 } from '@preflight/core'
-import type { Pro, ProStore, SessionRecord, SessionStore } from '@preflight/session'
+import type { Pro, ProStore, SessionRecord, SessionStore, TeamMember } from '@preflight/session'
 import type { Sql } from './sql.ts'
 
 interface ProRow {
@@ -212,6 +212,52 @@ export class PgSessionStore implements SessionStore {
         ],
       )
     }
+
+    // FR-7 팀원. 토큰은 발급 시 정해지고 바뀌지 않으므로 choices 만 갱신한다
+    for (const m of r.members) {
+      await this.sql.query(
+        `INSERT INTO session_member (id, session_id, token, seq, choices)
+         VALUES ($1,$2,$3,$4,$5)
+         ON CONFLICT (id) DO UPDATE SET choices = EXCLUDED.choices`,
+        [m.id, r.id, m.token, m.seq, JSON.stringify(m.choices)],
+      )
+    }
+  }
+
+  /**
+   * FR-7 — 팀원 토큰으로 세션을 찾는다.
+   *
+   * token 에 UNIQUE 가 걸려 있어 한 번의 질의로 끝난다. 세션을 훑어 찾는 형태로
+   * 두면 세션이 늘수록 느려지고, 토큰만으로 접근하는 제품에서 그건 곧 병목이다.
+   */
+  async byMemberToken(
+    token: string,
+  ): Promise<{ record: SessionRecord; memberId: string } | undefined> {
+    const { rows } = await this.sql.query<{ id: string; session_id: string }>(
+      `SELECT id, session_id FROM session_member WHERE token = $1`,
+      [token],
+    )
+    const row = rows[0]
+    if (!row) return undefined
+    const record = await this.byId(row.session_id)
+    return record === undefined ? undefined : { record, memberId: row.id }
+  }
+
+  async #members(sessionId: string): Promise<TeamMember[]> {
+    const { rows } = await this.sql.query<{
+      id: string
+      token: string
+      seq: number
+      choices: Record<string, Side[]> | string
+    }>(`SELECT id, token, seq, choices FROM session_member WHERE session_id = $1 ORDER BY seq`, [
+      sessionId,
+    ])
+    return rows.map((m) => ({
+      id: m.id,
+      token: m.token,
+      seq: Number(m.seq),
+      choices: json<Record<string, Side[]>>(m.choices),
+    }))
   }
 
   async #hydrate(row: SessionRow, token: string): Promise<SessionRecord> {
@@ -251,6 +297,7 @@ export class PgSessionStore implements SessionStore {
       axisOverrides: json<Record<string, SpecLine>>(row.axis_overrides),
       revisionsUsed: row.revisions_used,
       requests: json<RevisionRequest[]>(row.requests),
+      members: await this.#members(row.id),
       reviewGate: row.review_gate === true,
       reviewedAt: iso(row.reviewed_at),
       pnrPassedAt: iso(row.pnr_passed_at),

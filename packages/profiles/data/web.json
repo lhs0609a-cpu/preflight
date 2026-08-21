@@ -12,6 +12,7 @@
   "policy": {},
   "flow": [
     { "key": "taste" },
+    { "key": "team" },
     { "key": "structure" },
     { "key": "tone" },
     { "key": "scope" },
@@ -69,6 +70,16 @@
           }
         ]
       }
+    },
+    {
+      "id": "team",
+      "type": "ROSTER",
+      "labelKey": "block.team",
+      "icon": "grid",
+      "lock": "soft",
+      "priceImpact": false,
+      "required": false,
+      "config": { "kind": "ROSTER", "mode": "consensus", "maxMembers": 3, "compareAxes": true }
     },
     {
       "id": "structure",

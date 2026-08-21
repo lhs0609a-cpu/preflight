@@ -14,6 +14,7 @@ import {
   progressOf,
   renderOfferText,
   renderSheet,
+  serializedPairAt,
   shouldSettle,
   type AssetStates,
   type BlockConfig,
@@ -74,6 +75,11 @@ export interface FlowState {
   readonly pnrHoursLeft: number
   /** 리허설 체크포인트 중 통과한 수 */
   readonly pnrPassed: number
+
+  /** C-09 — 축별로 팀원들이 무엇을 골랐는가. A 는 주 클라이언트 */
+  readonly teamRows: readonly { axisKey: string; picks: readonly (Side | null)[] }[]
+  readonly teamMembers: number
+  readonly teamCanInvite: boolean
 }
 
 async function stateOf(token: string): Promise<FlowState> {
@@ -125,6 +131,40 @@ async function stateOf(token: string): Promise<FlowState> {
     delayedDays: view.delayedDays,
     startBlocked: view.startBlocked,
     ...pnrOf(record, config),
+    ...teamOf(record),
+  }
+}
+
+/**
+ * C-09 — 축별 대조표.
+ *
+ * 첫 열(A)은 **주 클라이언트**다. 최종 사양이 그 사람의 선택으로 가기 때문에
+ * 첫 자리에 둔다 — 대조는 정보 제공이고, 시스템은 어느 쪽도 막지 않는다
+ * (04 §5.3). 다수결이나 합의 강제를 넣으면 그 원칙이 깨진다.
+ */
+function teamOf(record: {
+  profile: { blocks: readonly { id: string; config: BlockConfig }[] }
+  choices: Record<string, Side[]>
+  members: readonly { seq: number; choices: Record<string, Side[]> }[]
+}): { teamRows: FlowState['teamRows']; teamMembers: number; teamCanInvite: boolean } {
+  const roster = record.profile.blocks.find((b) => b.config.kind === 'ROSTER')
+  const pairwise = record.profile.blocks.find((b) => b.config.kind === 'PAIRWISE')
+  if (roster === undefined || pairwise === undefined || roster.config.kind !== 'ROSTER') {
+    return { teamRows: [], teamMembers: 0, teamCanInvite: false }
+  }
+  const config = pairwise.config
+  if (config.kind !== 'PAIRWISE') return { teamRows: [], teamMembers: 0, teamCanInvite: false }
+
+  const sorted = [...record.members].sort((a, b) => a.seq - b.seq)
+  const columns = [record.choices, ...sorted.map((m) => m.choices)]
+
+  return {
+    teamRows: config.axes.map((axis, i) => ({
+      axisKey: axis.nameKey,
+      picks: columns.map((c) => (c[pairwise.id] ?? [])[i] ?? null),
+    })),
+    teamMembers: columns.length,
+    teamCanInvite: record.members.length < roster.config.maxMembers - 1,
   }
 }
 
@@ -218,6 +258,44 @@ export async function setAsset(
   const prev = record.assets[labelKey] ?? {}
   await svc.setAssets(token, { [labelKey]: { ...prev, ...patch } })
   return stateOf(token)
+}
+
+/** 팀원 화면이 아는 것. 카드 진행뿐이다 — 나머지는 주 클라이언트의 일이다 */
+export interface MemberState {
+  readonly answered: number
+  readonly pair: SerializedPair | null
+}
+
+/** 팀원 토큰이면 그 팀원의 진행 상태를, 아니면 null */
+export async function memberState(token: string): Promise<MemberState | null> {
+  const rt = await runtime()
+  const found = await rt.service.memberByToken(token)
+  if (found === undefined) return null
+  const { record, memberId } = found
+  const block = record.profile.blocks.find((b) => b.config.kind === 'PAIRWISE')
+  if (block === undefined || block.config.kind !== 'PAIRWISE') return null
+  const member = record.members.find((m) => m.id === memberId)!
+  const answered = (member.choices[block.id] ?? []).length
+  return { answered, pair: serializedPairAt(block.config, answered) }
+}
+
+export async function memberAnswer(token: string, side: Side): Promise<MemberState> {
+  const rt = await runtime()
+  const found = await rt.service.memberByToken(token)
+  if (found === undefined) throw new Error('UNAUTHORIZED')
+  const block = found.record.profile.blocks.find((b) => b.config.kind === 'PAIRWISE')!
+  await rt.service.memberAnswer(token, block.id, side)
+  return (await memberState(token))!
+}
+
+/**
+ * C-09 — 팀원 자리를 열고 링크를 돌려준다.
+ *
+ * 링크만 만든다. **보내지 않는다** (09 §2.1) — 클라이언트가 자기 메신저로
+ * 붙여넣는다. 우리가 대신 보내는 순간 이 제품이 지켜온 선이 무너진다.
+ */
+export async function inviteMember(token: string): Promise<ActionResult<string>> {
+  return attempt(async () => (await (await runtime()).service.addMember(token)).url)
 }
 
 /**

@@ -81,6 +81,7 @@ describe('마이그레이션', () => {
       axisOverrides: {},
       revisionsUsed: 0,
       requests: [],
+      members: [],
       pnrPassedAt: null,
       reviewGate: true,
       reviewedAt: null,
