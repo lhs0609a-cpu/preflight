@@ -2461,3 +2461,12 @@ ul {
 [dir='rtl'] {
   line-height: 1.75;
 }
+
+/* 콘솔 상단의 언어 선택기. 목록 위로 떠야 해서 겹침 순서를 올린다 */
+.pro-langs {
+  margin-inline-start: auto;
+}
+.pro-langs ul {
+  inset-inline-start: auto;
+  inset-inline-end: 0;
+}

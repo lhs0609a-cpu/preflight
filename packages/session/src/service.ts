@@ -24,6 +24,7 @@ import {
   transition,
   pendingCount,
   respond as respondToProposal,
+  shareTextFor,
   assertProposals,
   toClientView,
   type AssetState,
@@ -69,6 +70,13 @@ export interface IssueInput {
   readonly marketplace?: string
   /** 04 §5.2 검토 관문. 기본 꺼짐 — store.ts 의 reviewGate 주석 참고 */
   readonly reviewGate?: boolean
+  /**
+   * FR-3.3 — 붙여넣을 안내문의 언어. **고객의 언어**다.
+   *
+   * 프리랜서 로케일이 아니다. 이 한 줄만 고객이 읽고, 링크를 연 뒤는 무언어라
+   * 언어가 필요 없다. 기본은 영어 — 마켓플레이스의 공용어이기 때문이다.
+   */
+  readonly shareLocale?: string
 }
 
 export interface IssueResult {
@@ -215,8 +223,7 @@ export class SessionService {
       token,
       clientUrl,
       // 09 §2.1 — 생성만 한다. 전송은 사람이 한다.
-      shareText:
-        'Before we start, please pick a few options here — takes 5 minutes: ' + clientUrl,
+      shareText: shareTextFor(input.shareLocale ?? 'en', clientUrl),
       state: 'ISSUED',
     }
   }

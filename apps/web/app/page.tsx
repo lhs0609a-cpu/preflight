@@ -18,6 +18,7 @@
  * 없기 때문**이고(07 §8-6), 없는 걸 있다고 쓰면 초기 20인 모집에서 가장 비싼
  * 실수가 된다. 진짜 숫자가 생기면 그때 넣는다.
  */
+import type { Metadata } from 'next'
 import { headers } from 'next/headers'
 import Link from 'next/link'
 import { LOCALES, LOCALE_INFO, dirOf, serializedPairAt } from '@preflight/core'
@@ -28,6 +29,26 @@ import { landingFor, pickLocale } from './_lib/landing-copy.ts'
 import { HeroDemo, type DemoAxis } from './_components/HeroDemo.tsx'
 
 export const dynamic = 'force-dynamic'
+
+/**
+ * 링크 미리보기 문구도 언어를 따른다. 이 제품은 링크를 붙여넣는 게 전부라
+ * 미리보기가 첫인상이고, 그게 영어 고정이면 20개 언어가 무의미해진다.
+ */
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ lang?: string }>
+}): Promise<Metadata> {
+  const { lang } = await searchParams
+  const t = landingFor(pickLocale((await headers()).get('accept-language'), lang))
+  const title = `Preflight — ${t.h1a} ${t.h1b}`
+  return {
+    title,
+    description: t.sub,
+    openGraph: { title, description: t.sub },
+    twitter: { title, description: t.sub },
+  }
+}
 
 /** 데모에 쓸 축 수. 세 장이면 이해된다 — 더 넘기게 하면 이탈이 는다 */
 const DEMO_AXES = 3

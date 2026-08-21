@@ -1,20 +1,15 @@
 /**
  * 프리랜서 화면 레이아웃.
  *
- * 하는 일은 lang 을 프리랜서 로케일로 맞추는 것 하나다. 루트가 lang="en" 인데
- * 이 화면의 텍스트는 그 사람의 언어라서, 그대로 두면 브라우저가 줄바꿈·폰트
- * 선택을 영어 규칙으로 한다. 클라이언트 화면은 무언어라 루트의 en 이 맞다.
+ * **lang·dir 을 여기서 걸지 않는다.** Next 레이아웃은 searchParams 를 받지
+ * 못해서 `?lang=ar` 을 볼 수가 없다. 여기서 계정 로케일로 걸었더니 내용은
+ * 아랍어인데 dir 은 ltr 인 화면이 나왔다 — 로케일을 아는 쪽이 걸어야 한다.
+ *
+ * 그래서 이 레이아웃은 자리만 잡는다. 실제 lang·dir 은 ProConsole ·
+ * SessionDetail · SignupForm 이 자기 루트에 건다.
  */
 import type { ReactNode } from 'react'
-import { dirOf } from '@preflight/core'
-import { proLocale } from '../_lib/actions.ts'
 
-export default async function ProLayout({ children }: { children: ReactNode }) {
-  const locale = await proLocale()
-  // dir 도 여기서 정한다. ar · ur 은 글이 오른쪽에서 왼쪽으로 흐른다.
-  return (
-    <div lang={locale} dir={dirOf(locale)}>
-      {children}
-    </div>
-  )
+export default function ProLayout({ children }: { children: ReactNode }) {
+  return children
 }

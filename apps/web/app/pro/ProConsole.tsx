@@ -13,6 +13,8 @@ import Link from 'next/link'
 import { useState, useTransition } from 'react'
 import type { Copy } from '../_lib/copy.ts'
 import { issueLink, type IssuedLink, type SessionRow } from '../_lib/actions.ts'
+import { dirOf } from '@preflight/core'
+import { Icon } from '@preflight/ui'
 import { Copyable, ErrorNote, useToast } from './_ui.tsx'
 
 interface ProfileOption {
@@ -34,26 +36,53 @@ const STATE_DOT: Readonly<Record<string, string>> = {
 export function ProConsole({
   rows: initialRows,
   profiles,
+  locale,
+  langs,
   t,
 }: {
   readonly rows: readonly SessionRow[]
   readonly profiles: readonly ProfileOption[]
+  readonly locale: string
+  readonly langs: readonly { readonly code: string; readonly name: string }[]
   readonly t: Copy
 }) {
   const [rows] = useState(initialRows)
   const [slug, setSlug] = useState(profiles[0]?.slug ?? '')
   const [label, setLabel] = useState('')
   const [gate, setGate] = useState(false)
+  // 붙여넣을 안내문은 **고객**이 읽는다. 그 언어를 아는 사람은 프리랜서뿐이다.
+  const [shareLocale, setShareLocale] = useState('en')
   const [issued, setIssued] = useState<IssuedLink | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [pending, start] = useTransition()
   const { toast, show } = useToast()
 
   return (
-    <div className="pro">
+    <div className="pro" lang={locale} dir={dirOf(locale)}>
       <header className="pro-head">
         <h1>Preflight</h1>
         <p>{t.tagline}</p>
+        {/* 실제 인증이 붙기 전까지 계정이 하나뿐이라, 이게 없으면 20개 중
+            19개 로케일에 도달할 방법이 없다 */}
+        <details className="lp-langs pro-langs">
+          <summary aria-label={t.signupLocale}>
+            <Icon name="globe" size={15} />
+            {langs.find((l) => l.code === locale)?.name ?? locale}
+          </summary>
+          <ul>
+            {langs.map((l) => (
+              <li key={l.code}>
+                <a
+                  href={`/pro?lang=${l.code}`}
+                  lang={l.code}
+                  aria-current={l.code === locale ? 'true' : undefined}
+                >
+                  {l.name}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </details>
       </header>
 
       <section className="pro-card">
@@ -86,6 +115,16 @@ export function ProConsole({
             </span>
             <input value={label} placeholder="Acme Corp" onChange={(e) => setLabel(e.currentTarget.value)} />
           </label>
+          <label>
+            <span>{t.issuedShare}</span>
+            <select value={shareLocale} onChange={(e) => setShareLocale(e.currentTarget.value)}>
+              {langs.map((l) => (
+                <option key={l.code} value={l.code}>
+                  {l.name}
+                </option>
+              ))}
+            </select>
+          </label>
           <button
             type="button"
             className="pro-btn"
@@ -93,7 +132,7 @@ export function ProConsole({
             onClick={() => {
               setError(null)
               start(() => {
-                void issueLink(slug, label, gate).then((r) => {
+                void issueLink(slug, label, gate, shareLocale).then((r) => {
                   if (r.ok) setIssued(r.value)
                   else setError(r.code)
                 })
