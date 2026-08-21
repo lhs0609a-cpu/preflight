@@ -31,6 +31,8 @@ export interface Copy {
 
   issuedLink: string
   issuedShare: string
+  /** 공유 문구를 어느 언어로 뽑을지. **고객**이 읽는 문장이다 */
+  shareLang: string
   issuedNote: string
   issuedOpen: string
 
@@ -98,7 +100,8 @@ const en: Copy = {
   issueSubmit: 'Create link',
 
   issuedLink: 'Link',
-  issuedShare: 'Message to paste (English)',
+  issuedShare: 'Message to paste',
+  shareLang: "Client's language",
   issuedNote: 'Send it yourself. Paste it into your marketplace chat — auto-sending gets accounts banned, so we do not offer it.',
   issuedOpen: 'Open the client screen',
 
@@ -185,7 +188,8 @@ const ko: Copy = {
   issueSubmit: '링크 발급',
 
   issuedLink: '링크',
-  issuedShare: '붙여넣을 안내문 (영문)',
+  issuedShare: '붙여넣을 안내문',
+  shareLang: '고객 언어',
   issuedNote:
     '발송은 직접 하세요. 마켓플레이스 채팅에 붙여넣으면 됩니다 — 자동 전송은 계정 정지 사유라 제공하지 않습니다.',
   issuedOpen: '클라이언트 화면 열기',
@@ -272,7 +276,8 @@ const es: Copy = {
     'Tienes 24 horas para contraproponer antes de que se fije. El cliente debe abrir el enlace otra vez, avísale por el chat del marketplace.',
   issueSubmit: 'Crear enlace',
   issuedLink: 'Enlace',
-  issuedShare: 'Mensaje para pegar (inglés)',
+  issuedShare: 'Mensaje para pegar',
+  shareLang: 'Idioma del cliente',
   issuedNote:
     'Envíalo tú. Pégalo en el chat del marketplace — el envío automático provoca bloqueos de cuenta, por eso no lo ofrecemos.',
   issuedOpen: 'Abrir la pantalla del cliente',
@@ -352,7 +357,8 @@ const ptBR: Copy = {
     'Você tem 24 horas para contrapropor antes de fechar. O cliente precisa abrir o link de novo, avise no chat do marketplace.',
   issueSubmit: 'Criar link',
   issuedLink: 'Link',
-  issuedShare: 'Mensagem para colar (inglês)',
+  issuedShare: 'Mensagem para colar',
+  shareLang: 'Idioma do cliente',
   issuedNote:
     'Envie você mesmo. Cole no chat do marketplace — envio automático derruba contas, por isso não oferecemos.',
   issuedOpen: 'Abrir a tela do cliente',
@@ -432,7 +438,8 @@ const vi: Copy = {
     'Bạn có 24 giờ để đề xuất thay đổi trước khi chốt. Khách phải mở lại liên kết, hãy nhắn cho họ trên chat của sàn.',
   issueSubmit: 'Tạo liên kết',
   issuedLink: 'Liên kết',
-  issuedShare: 'Tin nhắn để dán (tiếng Anh)',
+  issuedShare: 'Tin nhắn để dán',
+  shareLang: 'Ngôn ngữ của khách',
   issuedNote:
     'Bạn tự gửi. Dán vào chat của sàn — gửi tự động sẽ bị khóa tài khoản nên chúng tôi không làm.',
   issuedOpen: 'Mở màn hình khách hàng',
@@ -512,7 +519,8 @@ const hi: Copy = {
     'तय होने से पहले आपके पास बदलाव सुझाने के लिए 24 घंटे हैं। क्लाइंट को लिंक फिर से खोलना होगा, इसलिए मार्केटप्लेस चैट पर बता दें।',
   issueSubmit: 'लिंक बनाएँ',
   issuedLink: 'लिंक',
-  issuedShare: 'चिपकाने का संदेश (अंग्रेज़ी)',
+  issuedShare: 'चिपकाने का संदेश',
+  shareLang: 'क्लाइंट की भाषा',
   issuedNote:
     'आप खुद भेजें। मार्केटप्लेस चैट में चिपका दें — अपने आप भेजने से खाते बंद हो जाते हैं, इसलिए हम वह सुविधा नहीं देते।',
   issuedOpen: 'क्लाइंट स्क्रीन खोलें',
@@ -592,7 +600,8 @@ const tl: Copy = {
     'May 24 oras kang magmungkahi ng pagbabago bago magsara. Kailangang buksan muli ng kliyente ang link, kaya sabihan mo siya sa chat ng marketplace.',
   issueSubmit: 'Gumawa ng link',
   issuedLink: 'Link',
-  issuedShare: 'Mensaheng idikit (Ingles)',
+  issuedShare: 'Mensaheng idikit',
+  shareLang: 'Wika ng kliyente',
   issuedNote:
     'Ikaw ang magpadala. Idikit sa chat ng marketplace — ang awtomatikong pagpapadala ay nagpapasara ng account, kaya hindi namin ito inaalok.',
   issuedOpen: 'Buksan ang screen ng kliyente',
@@ -672,7 +681,8 @@ const uk: Copy = {
     'У вас є 24 години, щоб запропонувати зміни до фіксації. Клієнт має відкрити посилання ще раз — напишіть йому в чат маркетплейсу.',
   issueSubmit: 'Створити посилання',
   issuedLink: 'Посилання',
-  issuedShare: 'Повідомлення для вставки (англійською)',
+  issuedShare: 'Повідомлення для вставки',
+  shareLang: 'Мова клієнта',
   issuedNote:
     'Надішліть самі. Вставте в чат маркетплейсу — автоматична розсилка призводить до блокування акаунтів, тому ми її не робимо.',
   issuedOpen: 'Відкрити екран клієнта',

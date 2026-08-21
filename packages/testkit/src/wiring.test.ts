@@ -45,7 +45,7 @@ async function rigFor(make: () => Promise<StoreBundle>): Promise<Rig> {
   const svc = new SessionService({
     store: bundle.sessions,
     pros: bundle.pros,
-    ids: { token: () => `tok${++n}`, id: () => `id${n}`, seq: () => n },
+    ids: { token: () => `tok${++n}`, id: () => `id${n}` },
   })
   return { svc, bundle }
 }

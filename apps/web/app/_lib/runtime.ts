@@ -83,7 +83,6 @@ function baseUrl(): string {
 
 async function build(): Promise<Runtime> {
   const { sessions, pros, backend } = await stores()
-  let seq = 0
 
   const service = new SessionService({
     store: sessions,
@@ -92,9 +91,6 @@ async function build(): Promise<Runtime> {
     ids: {
       token: () => randomHex(24),
       id: () => randomHex(16),
-      // TODO(M2): 월별 일련번호를 DB 시퀀스로 옮긴다. 인스턴스가 여럿이면
-      // 메모리 카운터가 겹치고, session.no 의 UNIQUE 제약이 그때 터진다.
-      seq: () => ++seq,
     },
   })
 

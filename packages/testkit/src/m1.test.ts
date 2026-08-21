@@ -21,7 +21,7 @@ function setup() {
     store: new InMemorySessionStore(),
     pros,
     clock: { now: () => '2026-09-02T00:00:00.000Z' },
-    ids: { token: () => `t${++n}`, id: () => `i${n}`, seq: () => 100 + n },
+    ids: { token: () => `t${++n}`, id: () => `i${n}` },
   })
   const proSvc = new ProService(pros, () => `pro${++n}`)
   return { service, proSvc, pros }

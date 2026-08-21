@@ -117,6 +117,23 @@ const iso = (v: Date | string | null): string | null =>
 export class PgSessionStore implements SessionStore {
   constructor(private readonly sql: Sql) {}
 
+  /**
+   * 03 §2.5 — 그 달의 다음 번호. 한 문장으로 끝나야 원자적이다.
+   *
+   * SELECT 로 읽고 UPDATE 로 쓰면 두 인스턴스가 같은 값을 읽는 창이 생기고,
+   * 그게 정확히 session.no 의 UNIQUE 가 터지는 경로다. upsert 의 RETURNING 이
+   * 그 창을 없앤다.
+   */
+  async nextSeq(period: string): Promise<number> {
+    const { rows } = await this.sql.query<{ n: number }>(
+      `INSERT INTO session_counter (period, n) VALUES ($1, 1)
+       ON CONFLICT (period) DO UPDATE SET n = session_counter.n + 1
+       RETURNING n`,
+      [period],
+    )
+    return Number(rows[0]!.n)
+  }
+
   async put(r: SessionRecord): Promise<void> {
     await this.sql.query(
       `INSERT INTO session (
