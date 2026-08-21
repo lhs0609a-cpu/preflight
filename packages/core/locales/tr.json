@@ -88,5 +88,16 @@
   "pnr.printorder": "Baskı emri",
   "scope.design": "Tasarım",
   "scope.dieline": "Kesim kalıbı",
-  "scope.print": "Baskı"
+  "scope.print": "Baskı",
+  "block.tone": "Üslup",
+  "tone.credible": "Güvenilir",
+  "tone.direct": "Doğrudan",
+  "tone.warm": "Sıcak",
+  "block.team": "Ekip",
+
+  "block.tone": "Üslup",
+  "tone.credible": "Güvenilir",
+  "tone.direct": "Doğrudan",
+  "tone.warm": "Sıcak",
+  "block.team": "Ekip"
 }

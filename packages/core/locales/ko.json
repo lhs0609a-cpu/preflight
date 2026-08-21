@@ -97,5 +97,11 @@
   "pnr.printorder": "인쇄 발주",
   "scope.design": "디자인",
   "scope.dieline": "칼선",
-  "scope.print": "인쇄"
+  "scope.print": "인쇄",
+
+  "block.tone": "톤",
+  "tone.credible": "신뢰형",
+  "tone.direct": "실용형",
+  "tone.warm": "감성형",
+  "block.team": "팀"
 }

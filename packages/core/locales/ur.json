@@ -88,5 +88,16 @@
   "pnr.printorder": "پرنٹ آرڈر",
   "scope.design": "ڈیزائن",
   "scope.dieline": "ڈائی لائن",
-  "scope.print": "پرنٹنگ"
+  "scope.print": "پرنٹنگ",
+  "block.tone": "لہجہ",
+  "tone.credible": "قابلِ اعتماد",
+  "tone.direct": "براہِ راست",
+  "tone.warm": "اپنائیت بھرا",
+  "block.team": "ٹیم",
+
+  "block.tone": "لہجہ",
+  "tone.credible": "قابلِ اعتماد",
+  "tone.direct": "براہِ راست",
+  "tone.warm": "اپنائیت بھرا",
+  "block.team": "ٹیم"
 }

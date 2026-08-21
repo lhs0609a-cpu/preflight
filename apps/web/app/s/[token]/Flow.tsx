@@ -37,13 +37,16 @@ import {
   NegotiationCompare,
   Ratio,
   ScopeAssemble,
+  PnrConfirm,
   SpecConfirm,
   StructurePick,
   TasteCards,
+  TonePick,
   Waiting,
 } from '@preflight/ui'
 import {
   answer,
+  confirmPnr,
   feedbackAxes,
   negotiationDeck,
   openSession,
@@ -90,6 +93,8 @@ export function Flow({ token, initial, initialSpec, steps, dict, configs, avatar
   const [spec, setSpec] = useState<Spec | null>(initialSpec)
   const [deck, setDeck] = useState<NegotiationCard[] | null>(null)
   const [feedbackOpen, setFeedbackOpen] = useState(false)
+  // C-12 보류. 아무것도 기록하지 않으므로 화면 로컬 상태다
+  const [held, setHeld] = useState(false)
   const [pending, start] = useTransition()
   const touch = useRef<number | null>(null)
 
@@ -345,7 +350,12 @@ export function Flow({ token, initial, initialSpec, steps, dict, configs, avatar
         />
       )}
 
-      {config?.kind === 'PICK_N' && cursor !== null && (
+      {/*
+        PICK_N 이 둘로 갈린다. 구조(C-05)는 저충실도 와이어프레임이고,
+        톤(C-06)은 **영문 견본**이다 — 결과물이 영문이라 원문을 보여준다.
+        슬러그가 아니라 config.style 로 가른다.
+      */}
+      {config?.kind === 'PICK_N' && cursor !== null && config.style !== 'sample' && (
         <>
           <StructurePick
             config={config}
@@ -355,6 +365,47 @@ export function Flow({ token, initial, initialSpec, steps, dict, configs, avatar
                 void pick(token, cursor, i).then(() => {
                   void settleBlock(token, cursor).then(commit)
                 })
+              })
+            }}
+          />
+          <span />
+        </>
+      )}
+
+      {config?.kind === 'PICK_N' && cursor !== null && config.style === 'sample' && (
+        <>
+          <TonePick
+            config={config}
+            onPick={(i) => {
+              start(() => {
+                void pick(token, cursor, i).then(() => {
+                  void settleBlock(token, cursor).then(commit)
+                })
+              })
+            }}
+          />
+          <span />
+        </>
+      )}
+
+      {/*
+        C-12. gated 유형(촬영·인쇄)은 컴파일이 REHEARSAL 블록을 흐름에 꽂는데,
+        여기 분기가 없던 동안 photo·print 는 취향 카드 다음이 **빈 화면**이었다.
+        4개 유형 중 2개가 못 쓰는 상태였다.
+      */}
+      {config?.kind === 'REHEARSAL' && cursor !== null && (
+        <>
+          <PnrConfirm
+            hoursLeft={state.pnrHoursLeft}
+            passed={state.pnrPassed}
+            total={config.checkpointKeys.length}
+            held={held}
+            busy={pending}
+            onHold={() => setHeld(true)}
+            onResume={() => setHeld(false)}
+            onConfirm={() => {
+              start(() => {
+                void confirmPnr(token, cursor).then(commit)
               })
             }}
           />

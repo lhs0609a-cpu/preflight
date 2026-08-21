@@ -97,5 +97,11 @@
   "pnr.printorder": "Lệnh in",
   "scope.design": "Thiết kế",
   "scope.dieline": "Khuôn bế",
-  "scope.print": "In"
+  "scope.print": "In",
+
+  "block.tone": "Giọng điệu",
+  "tone.credible": "Đáng tin",
+  "tone.direct": "Trực tiếp",
+  "tone.warm": "Ấm áp",
+  "block.team": "Nhóm"
 }

@@ -97,5 +97,11 @@
   "pnr.printorder": "Orden impresión",
   "scope.design": "Diseño",
   "scope.dieline": "Troquel",
-  "scope.print": "Impresión"
+  "scope.print": "Impresión",
+
+  "block.tone": "Tono",
+  "tone.credible": "Creíble",
+  "tone.direct": "Directo",
+  "tone.warm": "Cercano",
+  "block.team": "Equipo"
 }

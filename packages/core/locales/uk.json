@@ -97,5 +97,11 @@
   "pnr.printorder": "Замовлення друку",
   "scope.design": "Дизайн",
   "scope.dieline": "Штанцформа",
-  "scope.print": "Друк"
+  "scope.print": "Друк",
+
+  "block.tone": "Тон",
+  "tone.credible": "Надійний",
+  "tone.direct": "Прямий",
+  "tone.warm": "Теплий",
+  "block.team": "Команда"
 }

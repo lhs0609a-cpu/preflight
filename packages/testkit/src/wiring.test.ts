@@ -55,42 +55,53 @@ async function maybeSettle(svc: SessionService, token: string): Promise<void> {
   if (shouldSettle(await svc.view(token))) await svc.settle(token)
 }
 
-/** C-02 → C-03 확정까지. 앱이 하는 순서 그대로 */
-async function runTaste(
+/**
+ * 커서가 target 이 될 때까지 앞 블록을 순서대로 넘긴다.
+ *
+ * 블록 id 를 나열하지 않는다. 나열하면 프로파일에 블록이 하나 늘 때마다
+ * 이 파일을 고쳐야 하고, 실제로 톤(C-06) 블록을 넣었을 때 그렇게 깨졌다.
+ * 흐름은 프로파일이 정하므로 여기서는 커서를 따라가기만 한다.
+ */
+async function advanceTo(
   svc: SessionService,
   token: string,
   profile: CompiledProfile,
+  target: string | null,
   side: Side = 'a',
-): Promise<string> {
-  const block = profile.blocks.find((b) => b.config.kind === 'PAIRWISE')!
-  const config = block.config
-  if (config.kind !== 'PAIRWISE') throw new Error('unreachable')
-  for (let i = 0; i < config.axes.length; i++) await svc.answer(token, block.id, side)
-  await svc.settleBlock(token, block.id)
-  await maybeSettle(svc, token)
-  return block.id
+): Promise<void> {
+  await svc.open(token)
+  for (let guard = 0; guard < 24; guard++) {
+    const v = await svc.view(token)
+    if (v.cursor === target || v.cursor === null || v.settled) return
+
+    const block = profile.blocks.find((b) => b.id === v.cursor)!
+    const config = block.config
+    if (config.kind === 'PAIRWISE') {
+      const done = (await svc.record(token)).choices[block.id]?.length ?? 0
+      for (let i = done; i < config.axes.length; i++) await svc.answer(token, block.id, side)
+    } else if (config.kind === 'PICK_N') {
+      await svc.pick(token, block.id, 0)
+    }
+    await svc.settleBlock(token, block.id)
+    await maybeSettle(svc, token)
+  }
+  throw new Error(`advanceTo: ${target} 에 도달하지 못했다`)
+}
+
+/** 자료 블록 바로 앞까지. 이름이 아니라 mode 로 찾는다 */
+function assetsId(profile: CompiledProfile): string {
+  return profile.blocks.find(
+    (b) => b.config.kind === 'CHECKLIST' && b.config.mode === 'assets',
+  )!.id
 }
 
 async function runToScope(svc: SessionService, token: string): Promise<void> {
-  await svc.open(token)
-  await runTaste(svc, token, web)
-  const structure = web.blocks.find((b) => b.config.kind === 'PICK_N')!
-  await svc.pick(token, structure.id, 0)
-  await svc.settleBlock(token, structure.id)
-  await maybeSettle(svc, token)
-  const scope = web.blocks.find(
-    (b) => b.config.kind === 'CHECKLIST' && b.config.mode === 'scope',
-  )!
-  await svc.settleBlock(token, scope.id)
-  await maybeSettle(svc, token)
+  await advanceTo(svc, token, web, assetsId(web))
 }
 
 /** C-08 확정. 선택 블록이지만 커서를 비우려면 넘겨야 한다 */
 async function settleAssets(svc: SessionService, token: string): Promise<void> {
-  const assets = web.blocks.find(
-    (b) => b.config.kind === 'CHECKLIST' && b.config.mode === 'assets',
-  )!
-  await svc.settleBlock(token, assets.id)
+  await svc.settleBlock(token, assetsId(web))
   await maybeSettle(svc, token)
 }
 

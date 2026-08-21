@@ -88,5 +88,16 @@
   "pnr.printorder": "Zlecenie druku",
   "scope.design": "Projekt",
   "scope.dieline": "Wykrojnik",
-  "scope.print": "Drukowanie"
+  "scope.print": "Drukowanie",
+  "block.tone": "Ton",
+  "tone.credible": "Wiarygodny",
+  "tone.direct": "Bezpośredni",
+  "tone.warm": "Ciepły",
+  "block.team": "Zespół",
+
+  "block.tone": "Ton",
+  "tone.credible": "Wiarygodny",
+  "tone.direct": "Bezpośredni",
+  "tone.warm": "Ciepły",
+  "block.team": "Zespół"
 }

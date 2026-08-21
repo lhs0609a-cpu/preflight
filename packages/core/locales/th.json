@@ -88,5 +88,16 @@
   "pnr.printorder": "สั่งพิมพ์",
   "scope.design": "ออกแบบ",
   "scope.dieline": "แม่พิมพ์ตัด",
-  "scope.print": "การพิมพ์"
+  "scope.print": "การพิมพ์",
+  "block.tone": "โทน",
+  "tone.credible": "น่าเชื่อถือ",
+  "tone.direct": "ตรงไปตรงมา",
+  "tone.warm": "อบอุ่น",
+  "block.team": "ทีม",
+
+  "block.tone": "โทน",
+  "tone.credible": "น่าเชื่อถือ",
+  "tone.direct": "ตรงไปตรงมา",
+  "tone.warm": "อบอุ่น",
+  "block.team": "ทีม"
 }

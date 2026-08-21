@@ -16,6 +16,7 @@ import {
   renderSheet,
   shouldSettle,
   type AssetStates,
+  type BlockConfig,
   type Basis,
   type NegotiationProposal,
   type NegotiationView,
@@ -68,6 +69,11 @@ export interface FlowState {
   readonly assetsTotal: number
   readonly delayedDays: number
   readonly startBlocked: boolean
+
+  /** C-12 — 되돌릴 수 있는 창이 닫히기까지 남은 시간 (04 §5.4 절대 시간) */
+  readonly pnrHoursLeft: number
+  /** 리허설 체크포인트 중 통과한 수 */
+  readonly pnrPassed: number
 }
 
 async function stateOf(token: string): Promise<FlowState> {
@@ -118,8 +124,36 @@ async function stateOf(token: string): Promise<FlowState> {
     assetsTotal: view.assetsTotal,
     delayedDays: view.delayedDays,
     startBlocked: view.startBlocked,
+    ...pnrOf(record, config),
   }
 }
+
+/**
+ * C-12 가 보여줄 두 숫자.
+ *
+ * 체크포인트는 리허설이 실제로 끝났는지의 대리 지표다. 지금은 리허설 블록에
+ * 도달했다는 것 자체가 앞 블록이 전부 확정됐다는 뜻이므로 전부 통과로 본다 —
+ * 개별 체크는 프리랜서가 현장에서 하고, 여기서 클라이언트가 확인하는 것은
+ * "넘어가도 되는가" 하나다.
+ *
+ * 남은 시간은 열람 시각 + SLA 에서 파생한다. 저장하지 않는다 — 저장하면
+ * 배치가 필요하고, 그 배치가 안 돌면 화면이 조용히 틀린 숫자를 보여준다.
+ */
+function pnrOf(
+  record: { openedAt: string | null; pnrPassedAt: string | null },
+  config: BlockConfig | undefined,
+): { pnrHoursLeft: number; pnrPassed: number } {
+  if (config?.kind !== 'REHEARSAL') return { pnrHoursLeft: 0, pnrPassed: 0 }
+  const from = record.openedAt === null ? Date.now() : Date.parse(record.openedAt)
+  const left = Math.ceil((from + PNR_WINDOW_HOURS * 3_600_000 - Date.now()) / 3_600_000)
+  return {
+    pnrHoursLeft: Math.max(0, left),
+    pnrPassed: config.checkpointKeys.length,
+  }
+}
+
+/** 04 §5.4 — 영업일이 아니라 절대 시간. 국경 간에서는 영업일 정의가 서로 다르다 */
+const PNR_WINDOW_HOURS = 48
 
 /**
  * 확정 판단을 **서버 한 곳**에 둔다.
@@ -183,6 +217,20 @@ export async function setAsset(
   const record = await svc.record(token)
   const prev = record.assets[labelKey] ?? {}
   await svc.setAssets(token, { [labelKey]: { ...prev, ...patch } })
+  return stateOf(token)
+}
+
+/**
+ * C-12 확인 — 04 §3.3.
+ *
+ * 리허설 블록을 확정하고 되돌림 한계점을 통과시킨다. 순서가 중요하다:
+ * passPnr 은 리허설이 확정돼 있어야 통과하므로(gate.pnrAllowed) 먼저 확정한다.
+ */
+export async function confirmPnr(token: string, blockId: string): Promise<FlowState> {
+  const svc = (await runtime()).service
+  await svc.settleBlock(token, blockId)
+  await svc.passPnr(token)
+  await maybeSettle(token)
   return stateOf(token)
 }
 

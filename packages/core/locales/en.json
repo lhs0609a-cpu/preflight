@@ -97,5 +97,11 @@
   "pnr.printorder": "Print order",
   "scope.design": "Design",
   "scope.dieline": "Dieline",
-  "scope.print": "Printing"
+  "scope.print": "Printing",
+
+  "block.tone": "Tone",
+  "tone.credible": "Credible",
+  "tone.direct": "Direct",
+  "tone.warm": "Warm",
+  "block.team": "Team"
 }

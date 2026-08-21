@@ -88,5 +88,16 @@
   "pnr.printorder": "প্রিন্ট অর্ডার",
   "scope.design": "ডিজাইন",
   "scope.dieline": "ডাইলাইন",
-  "scope.print": "ছাপা"
+  "scope.print": "ছাপা",
+  "block.tone": "সুর",
+  "tone.credible": "নির্ভরযোগ্য",
+  "tone.direct": "সরাসরি",
+  "tone.warm": "আন্তরিক",
+  "block.team": "টিম",
+
+  "block.tone": "সুর",
+  "tone.credible": "নির্ভরযোগ্য",
+  "tone.direct": "সরাসরি",
+  "tone.warm": "আন্তরিক",
+  "block.team": "টিম"
 }

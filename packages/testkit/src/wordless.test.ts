@@ -9,9 +9,19 @@ describe('무언어 검사기 — G-5', () => {
     expect(violations).toEqual([])
   })
 
-  it('예외 없이 통과한다 — 지금은 등재된 예외가 0개다', () => {
-    expect(EXEMPTIONS).toHaveLength(0)
-    expect(scanWordless(CLIENT_SCREENS, EXEMPTIONS).usedExemptions).toEqual([])
+  /**
+   * 등재된 예외는 **전부 실제로 쓰여야** 한다. 개수를 박아두면 화면이 늘 때마다
+   * 이 줄을 고치게 되고, 고치는 순간 이 테스트는 아무것도 지키지 않는다.
+   * 지켜야 할 것은 "등재됐는데 안 쓰이는 예외가 없다" 이다.
+   */
+  it('등재된 예외가 전부 실제로 쓰인다 — 죽은 예외를 남기지 않는다', () => {
+    const used = new Set(scanWordless(CLIENT_SCREENS, EXEMPTIONS).usedExemptions)
+    expect(EXEMPTIONS.filter((e) => !used.has(e.id))).toEqual([])
+  })
+
+  it('지금 열려 있는 예외는 C-06 톤 견본 하나뿐이다', () => {
+    // 결과물이 영문이라 원문을 보여주는 유일한 자리다 (06 §C-06).
+    expect(EXEMPTIONS.map((e) => e.screen)).toEqual(['C-06'])
   })
 
   it('프로파일 4종 × 화면들을 실제로 렌더해서 본다 — 픽스처가 아니다', () => {

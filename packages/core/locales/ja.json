@@ -88,5 +88,16 @@
   "pnr.printorder": "印刷発注",
   "scope.design": "デザイン",
   "scope.dieline": "抜き型",
-  "scope.print": "印刷"
+  "scope.print": "印刷",
+  "block.tone": "トーン",
+  "tone.credible": "信頼",
+  "tone.direct": "実用",
+  "tone.warm": "共感",
+  "block.team": "チーム",
+
+  "block.tone": "トーン",
+  "tone.credible": "信頼",
+  "tone.direct": "実用",
+  "tone.warm": "共感",
+  "block.team": "チーム"
 }

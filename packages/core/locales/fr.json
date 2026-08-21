@@ -88,5 +88,16 @@
   "pnr.printorder": "Lancement impression",
   "scope.design": "Design",
   "scope.dieline": "Découpe",
-  "scope.print": "Impression"
+  "scope.print": "Impression",
+  "block.tone": "Ton",
+  "tone.credible": "Crédible",
+  "tone.direct": "Direct",
+  "tone.warm": "Chaleureux",
+  "block.team": "Équipe",
+
+  "block.tone": "Ton",
+  "tone.credible": "Crédible",
+  "tone.direct": "Direct",
+  "tone.warm": "Chaleureux",
+  "block.team": "Équipe"
 }

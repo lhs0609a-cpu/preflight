@@ -97,5 +97,11 @@
   "pnr.printorder": "Print order",
   "scope.design": "Disenyo",
   "scope.dieline": "Dieline",
-  "scope.print": "Pag-print"
+  "scope.print": "Pag-print",
+
+  "block.tone": "Tono",
+  "tone.credible": "Mapagkakatiwalaan",
+  "tone.direct": "Tuwiran",
+  "tone.warm": "Mainit",
+  "block.team": "Koponan"
 }
