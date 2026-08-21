@@ -412,12 +412,19 @@ export async function issueLink(
   slug: string,
   clientLabel: string,
   reviewGate = false,
+  shareLocale = 'en',
 ): Promise<ActionResult<IssuedLink>> {
   return attempt(async () => {
     const rt = await runtime()
     const profile = rt.profiles.find((p) => p.slug === slug)
     if (!profile) throw new Error('PROFILE_NOT_FOUND')
-    const r = await rt.service.issue({ proId: rt.proId, profile, clientLabel, reviewGate })
+    const r = await rt.service.issue({
+      proId: rt.proId,
+      profile,
+      clientLabel,
+      reviewGate,
+      shareLocale,
+    })
     return { no: r.no, clientUrl: r.clientUrl, shareText: r.shareText, token: r.token }
   })
 }

@@ -12,7 +12,7 @@
  */
 import Link from 'next/link'
 import { useMemo, useState, useTransition } from 'react'
-import { BASES, type Basis } from '@preflight/core'
+import { BASES, dirOf, type Basis } from '@preflight/core'
 import type { Copy } from '../../../_lib/copy.ts'
 import {
   passReview,
@@ -38,6 +38,7 @@ export function SessionDetail({
   deck,
   docs,
   dict,
+  locale,
   t,
 }: {
   readonly token: string
@@ -69,7 +70,7 @@ export function SessionDetail({
   const label = (key: string) => dict[key] ?? key
 
   return (
-    <div className="pro">
+    <div className="pro" lang={locale} dir={dirOf(locale)}>
       <header className="pro-head">
         <Link className="pro-back" href="/pro">
           ← {t.detailBack}

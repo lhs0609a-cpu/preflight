@@ -576,7 +576,11 @@ export function landingFor(locale: string): Landing {
  * 끝내면 랜딩이 다시 영어 전용이 된다. 가중치는 무시한다. 첫 일치면 충분하고,
  * 어차피 상단 선택기로 언제든 바꿀 수 있다.
  */
-export function pickLocale(header: string | null, override?: string | null): Locale {
+export function pickLocale(
+  header: string | null,
+  override?: string | null,
+  fallback?: string | null,
+): Locale {
   if (override !== null && override !== undefined && (LOCALES as readonly string[]).includes(override)) {
     return override as Locale
   }
@@ -587,6 +591,9 @@ export function pickLocale(header: string | null, override?: string | null): Loc
     const base = tag.split('-')[0]!
     if (base === 'pt') return 'pt-BR'
     if ((LOCALES as readonly string[]).includes(base)) return base as Locale
+  }
+  if (fallback !== null && fallback !== undefined && (LOCALES as readonly string[]).includes(fallback)) {
+    return fallback as Locale
   }
   return 'en'
 }
