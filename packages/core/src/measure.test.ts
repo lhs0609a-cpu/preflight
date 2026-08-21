@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { measure } from './measure.ts'
-import { labelKey, t, validateBundle, type LabelBundle } from './i18n/labels.ts'
+import { LOCALES, labelKey, t, validateBundle, type LabelBundle } from './i18n/labels.ts'
 
 describe('measure — 02 §3', () => {
   it('카탈로그의 실제 measure 를 받아들인다', () => {
@@ -44,16 +44,13 @@ describe('measure 는 번역 경로에 들어갈 수 없다', () => {
 })
 
 describe('validateBundle — NFR-1.2', () => {
-  const base = {
-    ko: { spacing: '여백' },
-    en: { spacing: 'Spacing' },
-    hi: { spacing: 'स्पेसिंग' },
-    tl: { spacing: 'Espasyo' },
-    vi: { spacing: 'Khoảng cách' },
-    uk: { spacing: 'Відступ' },
-    es: { spacing: 'Espaciado' },
-    'pt-BR': { spacing: 'Espaçamento' },
-  } satisfies LabelBundle
+  /**
+   * 로케일 목록에서 만든다. 손으로 나열하면 언어가 늘 때마다 이 파일을 고쳐야
+   * 하고, 고치는 걸 잊으면 "누락 검사" 테스트가 누락 때문에 못 돌게 된다.
+   */
+  const base = Object.fromEntries(
+    LOCALES.map((l) => [l, { spacing: 'Spacing' }]),
+  ) as unknown as LabelBundle
 
   it('전 로케일이 갖춰지고 3단어 이내면 통과', () => {
     expect(validateBundle(base)).toEqual([])

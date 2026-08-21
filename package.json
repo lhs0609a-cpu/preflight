@@ -15,10 +15,11 @@
     "test": "vitest run",
     "check:wordless": "tsx tools/ci/check-wordless.ts",
     "check:data-only": "node tools/ci/check-data-only.mjs",
-    "gate": "pnpm lint && pnpm typecheck && pnpm schema:check && pnpm labels:check && pnpm profiles:check && pnpm test && pnpm check:wordless",
+    "gate": "pnpm lint && pnpm typecheck && pnpm schema:check && pnpm labels:check && pnpm profiles:check && pnpm copy:check && pnpm test && pnpm check:wordless",
     "dev": "pnpm --filter @preflight/web dev",
     "build": "pnpm --filter @preflight/web build",
-    "start": "pnpm --filter @preflight/web start"
+    "start": "pnpm --filter @preflight/web start",
+    "copy:check": "tsx tools/ci/check-copy.ts"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.5",

@@ -20,6 +20,8 @@ export interface FigureProps {
   /** 스크린리더용. 문장을 써도 된다. */
   readonly label?: string
   readonly className?: string
+  /** RTL 에서 화살표만 뒤집으려면 아이콘 이름이 마크업에 있어야 한다 */
+  readonly 'data-icon'?: string
 }
 
 /**
@@ -28,12 +30,21 @@ export interface FigureProps {
  * React 로 SVG 를 다시 조립하지 않는다. toSvg 가 유일한 렌더러여야
  * 브라우저·서버 PNG·테스트가 같은 그림을 보고, 셋이 어긋나지 않는다 (12 §6.2).
  */
-export function Figure({ node, w, h, dict, label, className }: FigureProps): ReactNode {
+export function Figure({
+  node,
+  w,
+  h,
+  dict,
+  label,
+  className,
+  'data-icon': dataIcon,
+}: FigureProps): ReactNode {
   return (
     <span
       className={className ?? 'pf-figure'}
       role="img"
       aria-label={label}
+      data-icon={dataIcon}
       dangerouslySetInnerHTML={{ __html: toSvg(node, { w, h, ...(dict ? { dict } : {}) }) }}
     />
   )
@@ -48,9 +59,12 @@ export function Icon({
   readonly size?: number
   readonly label?: string
 }): ReactNode {
+  // data-icon 은 장식이 아니다. RTL 에서 화살표만 골라 뒤집어야 하는데,
+  // 이름이 마크업에 없으면 CSS 가 화살표와 자물쇠를 구분할 방법이 없다.
   return (
     <Figure
       className="pf-icon"
+      data-icon={name}
       node={{ k: 'glyph', x: 1, y: 1, size: size - 2, icon: name }}
       w={size}
       h={size}

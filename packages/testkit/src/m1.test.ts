@@ -3,6 +3,7 @@
  */
 import { describe, expect, it } from 'vitest'
 import {
+  LOCALES,
   renderSheet,
   textToPdf,
   toAscii,
@@ -62,7 +63,12 @@ describe('프리랜서 온보딩', () => {
     const { proSvc } = setup()
     const base = { email: 'e@f.com', displayName: 'X', locale: 'ko', timezone: 'Asia/Seoul' }
     await expect(proSvc.signup({ ...base, email: 'nope' })).rejects.toThrow(/EMAIL_INVALID/u)
-    await expect(proSvc.signup({ ...base, locale: 'fr' })).rejects.toThrow(/LOCALE_UNSUPPORTED/u)
+    // 목록에서 파생한다. 'fr' 을 박아뒀더니 프랑스어를 지원하는 순간 깨졌다 —
+    // 로케일이 늘 때마다 테스트를 고쳐야 하면 그 테스트는 오래 못 간다.
+    const unsupported = ['zz', 'xx', 'qq'].find((x) => !(LOCALES as readonly string[]).includes(x))!
+    await expect(proSvc.signup({ ...base, locale: unsupported })).rejects.toThrow(
+      /LOCALE_UNSUPPORTED/u,
+    )
     await expect(proSvc.signup({ ...base, timezone: 'Mars/Olympus' })).rejects.toThrow(/TIMEZONE_INVALID/u)
   })
 

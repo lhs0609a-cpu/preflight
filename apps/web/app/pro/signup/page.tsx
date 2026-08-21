@@ -9,7 +9,7 @@
  * 시차가 이 제품의 핵심 가치다 (03 §2.1 · FR-12.3).
  */
 import { headers } from 'next/headers'
-import { LOCALES } from '@preflight/core'
+import { LOCALES, LOCALE_INFO } from '@preflight/core'
 import { pickLocale } from '../../_lib/landing-copy.ts'
 import { SignupForm } from './SignupForm.tsx'
 
@@ -22,5 +22,11 @@ export default async function SignupPage({
 }) {
   const { lang } = await searchParams
   const locale = pickLocale((await headers()).get('accept-language'), lang)
-  return <SignupForm locales={[...LOCALES]} initialLocale={locale} />
+  return (
+    <SignupForm
+      locales={[...LOCALES]}
+      names={Object.fromEntries(LOCALES.map((l) => [l, LOCALE_INFO[l].nativeName]))}
+      initialLocale={locale}
+    />
+  )
 }

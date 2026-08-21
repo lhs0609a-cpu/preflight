@@ -15,6 +15,7 @@
  * 카드 번호를 받는 입력란도 없다. PG 가 발급한 빌링키만 받는다 (NFR-5.4).
  */
 import { useState, useTransition } from 'react'
+import { dirOf } from '@preflight/core'
 import { Icon } from '@preflight/ui'
 import { copyFor } from '../../_lib/copy.ts'
 import { landingFor } from '../../_lib/landing-copy.ts'
@@ -23,9 +24,12 @@ import { ErrorNote } from '../_ui.tsx'
 
 export function SignupForm({
   locales,
+  names,
   initialLocale,
 }: {
   readonly locales: readonly string[]
+  /** 자국어 이름. 코드로 적으면 자기 언어를 못 찾는다 */
+  readonly names: Readonly<Record<string, string>>
   readonly initialLocale: string
 }) {
   const [email, setEmail] = useState('')
@@ -46,7 +50,7 @@ export function SignupForm({
   const done = step === 3
 
   return (
-    <div className="su" lang={locale}>
+    <div className="su" lang={locale} dir={dirOf(locale)}>
       <nav className="su-nav">
         <a className="lp-mark" href="/">
           Preflight
@@ -107,7 +111,7 @@ export function SignupForm({
             >
               {locales.map((x) => (
                 <option key={x} value={x}>
-                  {x}
+                  {names[x] ?? x}
                 </option>
               ))}
             </select>

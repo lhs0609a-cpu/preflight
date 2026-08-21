@@ -577,40 +577,6 @@ ul {
   margin-inline-end: auto;
 }
 
-/*
- * 언어 선택기를 접어두지 않고 펼쳐 둔다. 자기 언어가 **보이는 것** 자체가
- * "여기는 내가 읽을 수 있는 곳" 이라는 신호이고, 그게 이 제품의 첫 약속이다.
- */
-.lp-langs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2px;
-  margin: 0;
-  padding: 3px;
-  border-radius: var(--r-full);
-  background: var(--surface);
-  border: 1px solid var(--hair);
-}
-.lp-langs a {
-  display: block;
-  padding: 3px 9px;
-  border-radius: var(--r-full);
-  font-size: 0.75rem;
-  font-family: var(--font-num);
-  color: var(--ink-3);
-  text-decoration: none;
-  transition:
-    background var(--dur) var(--ease),
-    color var(--dur) var(--ease);
-}
-.lp-langs a:hover {
-  color: var(--ink);
-}
-.lp-langs a[aria-current='true'] {
-  background: var(--ink);
-  color: var(--paper);
-}
-
 .lp-nav-cta {
   font-size: 0.875rem;
   font-weight: 550;
@@ -2369,4 +2335,129 @@ ul {
   align-items: center;
   gap: var(--s2);
   margin-block: calc(var(--s6) * -1);
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   언어 선택기 — 20개
+
+   알약처럼 늘어놓으면 상단바가 무너지고, 코드(ur · bn)로 적으면 아무도 자기
+   언어를 못 찾는다. 접어 두되 **자국어 이름**으로 적는다.
+   details/summary 라 자바스크립트 없이 동작한다 — 느린 기기에서 첫 화면부터
+   눌려야 하고, 이 제품의 사용자는 정확히 그런 기기를 쓴다.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.lp-langs {
+  position: relative;
+}
+.lp-langs summary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s2);
+  padding: var(--s2) var(--s4);
+  border-radius: var(--r-full);
+  border: 1px solid var(--hair);
+  background: var(--surface);
+  font-size: 0.8125rem;
+  cursor: pointer;
+  list-style: none;
+  transition: border-color var(--dur) var(--ease);
+}
+.lp-langs summary::-webkit-details-marker {
+  display: none;
+}
+.lp-langs summary:hover {
+  border-color: var(--ink-3);
+}
+.lp-langs .pf-icon {
+  color: var(--ink-3);
+}
+
+.lp-langs ul {
+  position: absolute;
+  inset-block-start: calc(100% + var(--s2));
+  inset-inline-start: 0;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(130px, 1fr));
+  gap: 2px;
+  margin: 0;
+  padding: var(--s2);
+  border-radius: var(--r-md);
+  border: 1px solid var(--hair);
+  background: var(--paper);
+  box-shadow: var(--shadow-3);
+  max-block-size: 60vh;
+  overflow-y: auto;
+}
+@media (min-width: 560px) {
+  .lp-langs ul {
+    grid-template-columns: repeat(3, minmax(130px, 1fr));
+  }
+}
+.lp-langs ul a {
+  display: block;
+  padding: var(--s2) var(--s3);
+  border-radius: var(--r-sm);
+  font-size: 0.875rem;
+  color: var(--ink-2);
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background var(--dur) var(--ease),
+    color var(--dur) var(--ease);
+}
+.lp-langs ul a:hover {
+  background: var(--surface);
+  color: var(--ink);
+}
+.lp-langs ul a[aria-current='true'] {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   RTL — 아랍어 · 우르두어
+
+   레이아웃은 거의 공짜다. 스타일시트가 처음부터 논리적 속성만 써서 물리적
+   속성이 0개이기 때문이다 (inline-size · margin-inline · inset-inline …).
+   dir 만 걸면 열도 여백도 통째로 뒤집힌다.
+   남는 것은 **방향 자체가 의미인 것들**뿐이고, 그건 아래 셋이 전부다.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/*
+ * 1. 화살표. 글이 오른쪽에서 왼쪽으로 흐르면 "다음" 은 왼쪽을 가리켜야 한다.
+ *    위·아래 화살표는 건드리지 않는다 — 그건 방향이 뒤집히지 않는다.
+ */
+[dir='rtl'] .pf-icon[data-icon='arrow-right'],
+[dir='rtl'] .pf-icon[data-icon='arrow-left'],
+[dir='rtl'] .pf-icon[data-icon='arrow-back'] {
+  transform: scaleX(-1);
+}
+
+/* 2. 손실 연쇄의 → 는 문자라 자동으로 안 뒤집힌다 */
+[dir='rtl'] .lp-chain li + li::before {
+  content: '←';
+}
+
+/* 3. 검토 화면의 현재값 → 제안값 */
+[dir='rtl'] .pro-arrow {
+  transform: scaleX(-1);
+  display: inline-block;
+}
+
+/*
+ * 숫자는 뒤집지 않는다. measure 는 번역하지 않는 값이고(02 §3), 방향까지
+ * 바꾸면 "padding 32px" 가 양쪽에서 다르게 읽힌다 — 양측이 같은 것을 본다는
+ * 전제가 거기서 깨진다.
+ */
+[dir='rtl'] .pf-num,
+[dir='rtl'] .pf-measure,
+[dir='rtl'] .pro-m {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+/* 아랍 문자는 라틴보다 x-높이가 낮고 위아래로 길다. 줄 간격을 조금 연다 */
+[dir='rtl'] {
+  line-height: 1.75;
 }

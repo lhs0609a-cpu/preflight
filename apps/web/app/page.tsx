@@ -20,7 +20,7 @@
  */
 import { headers } from 'next/headers'
 import Link from 'next/link'
-import { LOCALES, serializedPairAt } from '@preflight/core'
+import { LOCALES, LOCALE_INFO, dirOf, serializedPairAt } from '@preflight/core'
 import { renderCard, type IconKey } from '@preflight/render'
 import { Figure, Icon } from '@preflight/ui'
 import { runtime } from './_lib/runtime.ts'
@@ -61,18 +61,34 @@ export default async function Landing({
   }))
 
   return (
-    <div className="lp" lang={locale}>
+    <div className="lp" lang={locale} dir={dirOf(locale)}>
       <nav className="lp-nav">
         <span className="lp-mark">Preflight</span>
-        <ul className="lp-langs" aria-label={t.langLabel}>
-          {LOCALES.map((l) => (
-            <li key={l}>
-              <a href={`/?lang=${l}`} aria-current={l === locale ? 'true' : undefined}>
-                {l}
-              </a>
-            </li>
-          ))}
-        </ul>
+        {/*
+          20개를 알약처럼 늘어놓으면 상단바가 무너지고, 코드(ur · bn)로 적으면
+          아무도 자기 언어를 못 찾는다. details 로 접되 **자국어 이름**으로 적는다.
+          자바스크립트 없이 동작한다 — 느린 기기에서 첫 화면부터 눌려야 한다.
+        */}
+        <details className="lp-langs">
+          <summary aria-label={t.langLabel}>
+            <Icon name="globe" size={15} />
+            {LOCALE_INFO[locale].nativeName}
+          </summary>
+          <ul>
+            {LOCALES.map((l) => (
+              <li key={l}>
+                <a
+                  href={`/?lang=${l}`}
+                  lang={l}
+                  dir={LOCALE_INFO[l].dir}
+                  aria-current={l === locale ? 'true' : undefined}
+                >
+                  {LOCALE_INFO[l].nativeName}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </details>
         {/* 로그인이 없는 제품이라 상단은 "콘솔" 이 아니라 시작 경로여야 한다 */}
         <Link className="lp-nav-cta" href="/pro/signup">
           {t.cta}
