@@ -60,7 +60,6 @@ export interface Ids {
   /** NFR-5.1 — 128bit 이상 */
   token(): string
   id(): string
-  seq(): number
 }
 
 export interface IssueInput {
@@ -139,11 +138,9 @@ function randomHex(bytes: number): string {
   return [...b].map((x) => x.toString(16).padStart(2, '0')).join('')
 }
 
-let fallbackSeq = 0
 const defaultIds: Ids = {
   token: () => randomHex(24), // 192bit — NFR-5.1 하한 초과
   id: () => randomHex(16),
-  seq: () => ++fallbackSeq,
 }
 
 export class SessionService {
@@ -185,7 +182,13 @@ export class SessionService {
 
     const now = this.#clock.now()
     const d = new Date(now)
-    const no = formatSessionNo(d.getUTCFullYear(), d.getUTCMonth() + 1, this.#ids.seq())
+    // 번호는 저장소가 준다. 메모리 카운터면 인스턴스가 여럿일 때 겹친다.
+    const period = `${d.getUTCFullYear()}${String(d.getUTCMonth() + 1).padStart(2, '0')}`
+    const no = formatSessionNo(
+      d.getUTCFullYear(),
+      d.getUTCMonth() + 1,
+      await this.#store.nextSeq(period),
+    )
     const token = this.#ids.token()
 
     const record: SessionRecord = {

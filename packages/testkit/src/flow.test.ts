@@ -42,13 +42,11 @@ const PRO: Pro = {
  */
 function deterministic(): { clock: Clock; ids: Ids } {
   let n = 0
-  let seq = 141
   return {
     clock: { now: () => '2026-09-02T00:00:00.000Z' },
     ids: {
       token: () => `tok${String(++n).padStart(6, '0')}`,
       id: () => `id${String(n).padStart(6, '0')}`,
-      seq: () => ++seq,
     },
   }
 }

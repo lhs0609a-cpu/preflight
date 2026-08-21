@@ -100,6 +100,14 @@ export interface ProStore {
 
 export interface SessionStore {
   put(record: SessionRecord): Promise<void>
+  /**
+   * 03 §2.5 — 그 달의 다음 번호. **원자적이어야 한다.**
+   *
+   * 메모리 카운터로 두면 서버리스에서 두 인스턴스가 같은 번호를 발급하고
+   * session.no 의 UNIQUE 가 터진다. 사용자에게는 발급 실패로 보인다.
+   * period 는 'YYYYMM' — 번호가 PF-YYMM-NNNN 이라 달마다 1부터 다시 센다.
+   */
+  nextSeq(period: string): Promise<number>
   byToken(token: string): Promise<SessionRecord | undefined>
   byId(id: string): Promise<SessionRecord | undefined>
   listByPro(proId: string): Promise<SessionRecord[]>
@@ -126,6 +134,13 @@ export class InMemoryProStore implements ProStore {
 export class InMemorySessionStore implements SessionStore {
   readonly #byToken = new Map<string, SessionRecord>()
   readonly #byId = new Map<string, SessionRecord>()
+  readonly #seq = new Map<string, number>()
+
+  async nextSeq(period: string): Promise<number> {
+    const n = (this.#seq.get(period) ?? 0) + 1
+    this.#seq.set(period, n)
+    return n
+  }
 
   async put(record: SessionRecord): Promise<void> {
     this.#byToken.set(record.token, record)

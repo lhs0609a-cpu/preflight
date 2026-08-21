@@ -116,7 +116,7 @@ export function ProConsole({
             <input value={label} placeholder="Acme Corp" onChange={(e) => setLabel(e.currentTarget.value)} />
           </label>
           <label>
-            <span>{t.issuedShare}</span>
+            <span>{t.shareLang}</span>
             <select value={shareLocale} onChange={(e) => setShareLocale(e.currentTarget.value)}>
               {langs.map((l) => (
                 <option key={l.code} value={l.code}>

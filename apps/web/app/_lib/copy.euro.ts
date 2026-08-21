@@ -18,7 +18,8 @@ export const id: Copy = {
     'Anda punya 24 jam untuk mengajukan usulan balik sebelum spesifikasi dikunci. Klien harus membuka tautannya lagi, jadi beri tahu dia lewat chat marketplace.',
   issueSubmit: 'Buat tautan',
   issuedLink: 'Tautan',
-  issuedShare: 'Pesan untuk ditempel (Inggris)',
+  issuedShare: 'Pesan untuk ditempel',
+  shareLang: 'Bahasa klien',
   issuedNote:
     'Kirim sendiri. Tempel di chat marketplace — pengiriman otomatis membuat akun diblokir, jadi kami tidak menyediakannya.',
   issuedOpen: 'Buka layar klien',
@@ -97,7 +98,8 @@ export const tr: Copy = {
     'Şartlar kilitlenmeden önce karşı öneri sunmak için 24 saatiniz var. Müşterinin bağlantıyı yeniden açması gerekir, bu yüzden pazar yeri sohbetinden haber verin.',
   issueSubmit: 'Bağlantı oluştur',
   issuedLink: 'Bağlantı',
-  issuedShare: 'Yapıştırılacak mesaj (İngilizce)',
+  issuedShare: 'Yapıştırılacak mesaj',
+  shareLang: 'Müşterinin dili',
   issuedNote:
     'Kendiniz gönderin. Pazar yeri sohbetine yapıştırın — otomatik gönderim hesapların kapanmasına yol açtığı için sunmuyoruz.',
   issuedOpen: 'Müşteri ekranını aç',
@@ -176,7 +178,8 @@ export const ru: Copy = {
     'У вас есть 24 часа, чтобы предложить изменения до фиксации. Клиенту нужно открыть ссылку заново — напишите ему в чат площадки.',
   issueSubmit: 'Создать ссылку',
   issuedLink: 'Ссылка',
-  issuedShare: 'Текст для вставки (английский)',
+  issuedShare: 'Текст для вставки',
+  shareLang: 'Язык клиента',
   issuedNote:
     'Отправьте сами. Вставьте в чат площадки — автоотправка приводит к блокировке аккаунтов, поэтому мы её не делаем.',
   issuedOpen: 'Открыть экран клиента',
@@ -255,7 +258,8 @@ export const pl: Copy = {
     'Masz 24 godziny na kontrpropozycję, zanim specyfikacja zostanie zamknięta. Klient musi otworzyć link ponownie, więc napisz mu na czacie platformy.',
   issueSubmit: 'Utwórz link',
   issuedLink: 'Link',
-  issuedShare: 'Wiadomość do wklejenia (angielski)',
+  issuedShare: 'Wiadomość do wklejenia',
+  shareLang: 'Język klienta',
   issuedNote:
     'Wyślij samodzielnie. Wklej na czacie platformy — automatyczna wysyłka kończy się blokadą konta, więc jej nie oferujemy.',
   issuedOpen: 'Otwórz ekran klienta',
@@ -334,7 +338,8 @@ export const de: Copy = {
     'Du hast 24 Stunden für einen Gegenvorschlag, bevor die Spezifikation festgeschrieben wird. Der Kunde muss den Link erneut öffnen — sag ihm im Marktplatz-Chat Bescheid.',
   issueSubmit: 'Link erstellen',
   issuedLink: 'Link',
-  issuedShare: 'Nachricht zum Einfügen (Englisch)',
+  issuedShare: 'Nachricht zum Einfügen',
+  shareLang: 'Sprache des Kunden',
   issuedNote:
     'Verschicke ihn selbst. Füge ihn im Marktplatz-Chat ein — automatischer Versand führt zu Sperren, deshalb bieten wir das nicht an.',
   issuedOpen: 'Kundenansicht öffnen',
@@ -413,7 +418,8 @@ export const fr: Copy = {
     'Vous avez 24 heures pour proposer une modification avant que la fiche ne soit figée. Le client doit rouvrir le lien, prévenez-le dans le chat de la plateforme.',
   issueSubmit: 'Créer le lien',
   issuedLink: 'Lien',
-  issuedShare: 'Message à coller (anglais)',
+  issuedShare: 'Message à coller',
+  shareLang: 'Langue du client',
   issuedNote:
     'Envoyez-le vous-même. Collez-le dans le chat de la plateforme — les envois automatiques font bannir les comptes, nous ne le proposons donc pas.',
   issuedOpen: 'Ouvrir l’écran client',
